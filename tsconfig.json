@@ -7,6 +7,12 @@
         "target": "es6",
         "module": "commonjs",
         "outDir": "lib",
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowJs": false,
+        "paths": {
+          "*": ["./node_modules/@types", "./src"]
+        },
         "lib": [
           "es6",
           "dom"
@@ -16,7 +22,9 @@
       "./src/**/*"
     ],
     "exclude": [
+      "./**/*.d.ts",
       "./packages",
+      "./node_modules",
       "./lib",
       "./obj",
       "./bin",
