@@ -145,15 +145,15 @@
                     <div class="row border border-dark">
                         <div class="col">
                             <div class="input-group mb-3 input-group-sm">
-                                <span class="input-group-text">Base</span>
-                                <input type="number" class="form-control" name="baseValueTextBox" ng-model="baseValue" />
+                                <label class="input-group-text" for="baseValueTextBox">Base</label>
+                                <input type="number" class="form-control" id="baseValueTextBox" name="baseValueTextBox" ng-model="baseValue" />
                                 <span ng-show="mainForm.baseValueTextBox.$invalid">The base number value required.</span>
                             </div>
                         </div>
                         <div class="col">
                             <div class="input-group mb-3 input-group-sm">
                                 <span class="input-group-text">Shift</span>
-                                <input type="number" class="form-control" name="valueShiftTextBox" ng-model="valueShift" />
+                                <input type="number" class="form-control" id="valueShiftTextBox" name="valueShiftTextBox" ng-model="valueShift" />
                                 <span ng-show="mainForm.valueShiftTextBox.$invalid">The number calculation shift value required.</span>
                             </div>
                         </div>
@@ -236,7 +236,7 @@
                         <div class="input-group-text">
                             <input type="radio" id="addMultiplyFormulaRadioButton" name="baseFormulaRadioButton" value="addMultiply" ng-model="baseFormula" />
                         </div>
-                        <label for="multiplyAddFormulaRadioButton" class="form-control">Add, then
+                        <label for="addMultiplyFormulaRadioButton" class="form-control">Add, then
                             Multiply<br /><code>(height + width) * height * width</code></label>
                     </div>
                 </div>
@@ -246,12 +246,17 @@
     <table>
         <thead>
             <tr>
+                <th scope="col">Urgency</th>
+                <th scope="col">Impact</th>
                 <th scope="col" ng-repeat="x in headings">{{ x }}</th>
+                <th scope="col">Priority</th>
             </tr>
         </thead>
-        <tr ng-repeat="x in rows">
-            <th scope="row">{{ x.heading }}</td>
-            <td ng-repeat="c in x.columns">{{ c }}</td>
+        <tr ng-repeat="r in calculationResults">
+            <td>{{ r.urgency }}</td>
+            <td>{{ r.impact }}</td>
+            <td ng-repeat="c in x.values">{{ c }}</td>
+            <th scope="row">{{ r.priority }}</th>
         </tr>
     </table>
 </body>
