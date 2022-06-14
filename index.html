@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=1280, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular-csp.css"
+        integrity="sha512-f7WVHp6iaZ7iOx9duYm67KLwCFJ9KirfMIK0MAOxf1wq5M8Ogdw5ljbCxlk/BtWIbyXWMsIaDaqwUpXttPQ/5g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/css/bootstrap.min.css"
+        integrity="sha512-o/MhoRPVLExxZjCFVBsm17Pkztkzmh7Dp8k7/3JrtNCHh0AQ489kwpfA3dPSHzKDe8YCuEhxXq3Y71eb/o6amg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/css/bootstrap-grid.min.css"
+        integrity="sha512-QWjMsIpO5eW4+c4ASTEaZ4+eZNZ4YTtSDiu167Rq1Eqw//WlO+rXo4OvZMpyW/ykbN5LFeXmN6N416OzmWo7fA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-csp.min.css"
+        integrity="sha512-3mC4Q7Z/awACW7Zf0QGvaU8dEXv862RQD6kmpNXTuiUV6X/sdl1QhiiN5z9x/iNpvMFsQ+NBD3TKGrFI3vP0QA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
+    <link rel="stylesheet" href="lib/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.js"
+        integrity="sha512-klc+qN5PPscoGxSzFpetVsCr9sryi2e2vHwZKq43FdFyhSAa7vAqog/Ifl8tzg/8mBZiG2MAKhyjH5oPJp65EA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/js/bootstrap.min.js"
+        integrity="sha512-Hqe3s+yLpqaBbXM6VA0cnj/T56ii5YjNrMT9v+us11Q81L0wzUG0jEMNECtugqNu2Uq5MSttCg0p4KK0kCPVaQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap.min.js"
+        integrity="sha512-DnqROrGrc9uBNiRGC7ZWLbctwtoVcD5005fL7pGUOkylaE7zXunb6xYUkD/nI0MYZn8XxReXnub2V/nspYUkUw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <script src="lib/app.js"></script>
+    <title>ITIL Priority Calculator</title>
+</head>
+
+<body ng-app="mainModule" ng-controller="MainController">
+    <form name="mainForm">
+        <div class="container-fluid">
+            <div class="row bg-dark text-white">
+                <div class="col-md-5 border border-light">
+                    <div class="row text-center">
+                        <div class="col">Ranges</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            <label for="urgencyRangeDropDown">Urgency</label>
+                        </div>
+                        <div class="col text-center">
+                            <label for="impactRangeDropDown">Impact</label>
+                        </div>
+                        <div class="col text-center">
+                            <label for="priorityRangeDropDown">Priority</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7 border border-light">
+                    <div class="row text-center">
+                        <div class="col">Options</div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-center">
+                            <label for="vipCheckBox">VIP</label>
+                        </div>
+                        <div class="col text-center">
+                            <label for="businessCriticalCheckBox">Business Critical</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5 border border-dark">
+                    <div class="row">
+                        <div class="col">
+                            <select id="urgencyRangeDropDown" class="form-select" ng-model="urgencyRange">
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select id="impactRangeDropDown" class="form-select" ng-model="impactRange">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <select id="priorityRangeDropDown" class="form-select" ng-model="priorityRange">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7 border border-dark">
+                    <div class="row">
+                        <div class="col input-group mb-3">
+                            <div class="input-group-text">
+                                <input type="radio" id="vipTrueRadioButton" name="vipRadioButton" value="true" ng-model="vipOption" />
+                            </div>
+                            <label for="vipTrueRadioButton" class="form-control">Yes</label>
+                        </div>
+                        <div class="col input-group mb-3">
+                            <div class="input-group-text">
+                                <input type="radio" id="vipFalseRadioButton" name="vipRadioButton" value="false" ng-model="vipOption" />
+                            </div>
+                            <label for="vipFalseRadioButton" class="form-control">No</label>
+                        </div>
+    
+                        <div class="col input-group mb-3">
+                            <div class="input-group-text">
+                                <input type="radio" id="businessCriticalTrueRadioButton" name="businessCriticalRadioButton" value="true" ng-model="businessCriticalOption" />
+                            </div>
+                            <label for="businessCriticalTrueRadioButton" class="form-control">Yes</label>
+                        </div>
+                        <div class="col input-group mb-3">
+                            <div class="input-group-text">
+                                <input type="radio" id="businessCriticalFalseRadioButton" name="businessCriticalRadioButton" value="false" ng-model="businessCriticalOption" />
+                            </div>
+                            <label for="businessCriticalFalseRadioButton" class="form-control">No</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row bg-dark text-white">
+                <div class="col-md-5 border border-light text-center">
+                    Value Offsets
+                </div>
+                <div class="col-md-7 border border-light text-center">
+                    Base Formula
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="row border border-dark">
+                        <div class="col">
+                            <div class="input-group mb-3 input-group-sm">
+                                <span class="input-group-text">Base</span>
+                                <input type="number" class="form-control" name="baseValueTextBox" ng-model="baseValue" />
+                                <span ng-show="mainForm.baseValueTextBox.$invalid">The base number value required.</span>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="input-group mb-3 input-group-sm">
+                                <span class="input-group-text">Shift</span>
+                                <input type="number" class="form-control" name="valueShiftTextBox" ng-model="valueShift" />
+                                <span ng-show="mainForm.valueShiftTextBox.$invalid">The number calculation shift value required.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row bg-dark text-white text-center">
+                        <div class="col">
+                            Rounding
+                        </div>
+                    </div>
+                    <div class="row border border-dark">
+                        <div class="col">
+                            <div class="input-group mb-3">
+                                <div class="input-group-text">
+                                    <input type="radio" id="floorRadioButton" name="roundingRadioButton" value="ceiling" ng-model="rounding" />
+                                </div>
+                                <label for="floorRadioButton" class="form-control">Ceiling</label>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-text">
+                                    <input type="radio" id="ceilingRadioButton" name="roundingRadioButton" value="floor" ng-model="rounding" />
+                                </div>
+                                <label for="ceilingRadioButton" class="form-control">Floor</label>
+                            </div>
+                            <div class="input-group mb-3">
+                                <div class="input-group-text">
+                                    <input type="radio" id="roundNearestRadioButton" name="roundingRadioButton" value="nearest" ng-model="rounding" />
+                                </div>
+                                <label for="roundNearestRadioButton" class="form-control">Nearest</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row bg-dark text-white text-center">
+                        <div class="col">
+                            <div class="row">
+                                <div class="col">Weights</div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="vipWeightTextBox">VIP</label>
+                                </div>
+                                <div class="col">
+                                    <label for="businessCriticalWeightTextBox">Business Critical</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row border border-dark">
+                        <div class="col">
+                            <input type="number" id="vipWeightTextBox" name="vipWeightTextBox" class="form-control" ng-model="vipWeight" />
+                            <span ng-show="mainForm.vipWeightTextBox.$invalid">VIP weight value is required.</span>
+                        </div>
+                        <div class="col">
+                            <input type="number" id="businessCriticalWeightTextBox" name="businessCriticalWeightTextBox" class="form-control" ng-model="businessCriticalWeight" />
+                            <span ng-show="mainForm.businessCriticalWeightTextBox.$invalid">Business Critical weight value is required.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7 border border-dark">
+                    <div class="input-group mb-3">
+                        <div class="input-group-text">
+                            <input type="radio" id="multiplyFormulaRadioButton" name="baseFormulaRadioButton" value="multiply" ng-model="baseFormula" />
+                        </div>
+                        <label for="multiplyFormulaRadioButton"
+                            class="form-control">Multiply<br /><code>height * width</code></label>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-text">
+                            <input type="radio" id="addFormulaRadioButton" name="baseFormulaRadioButton" value="add" ng-model="baseFormula" />
+                        </div>
+                        <label for="addFormulaRadioButton" class="form-control">Add<br /><code>height + width</code></label>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-text">
+                            <input type="radio" id="multiplyAddFormulaRadioButton" name="baseFormulaRadioButton" value="multiplyAdd" ng-model="baseFormula" />
+                        </div>
+                        <label for="multiplyAddFormulaRadioButton" class="form-control">Multiply, then
+                            Add<br /><code>(height * width) + height + width</code></label>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-text">
+                            <input type="radio" id="addMultiplyFormulaRadioButton" name="baseFormulaRadioButton" value="addMultiply" ng-model="baseFormula" />
+                        </div>
+                        <label for="multiplyAddFormulaRadioButton" class="form-control">Add, then
+                            Multiply<br /><code>(height + width) * height * width</code></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col" ng-repeat="x in headings">{{ x }}</th>
+            </tr>
+        </thead>
+        <tr ng-repeat="x in rows">
+            <th scope="row">{{ x.heading }}</td>
+            <td ng-repeat="c in x.columns">{{ c }}</td>
+        </tr>
+    </table>
+</body>
+
+</html>

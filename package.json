@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/angular": "^1.8.4",
+    "@types/bootstrap": "^5.1.12",
+    "@types/jquery": "^3.5.14"
+  },
+  "dependencies": {
+    "@types/angular-ui-bootstrap": "^1.0.1"
+  }
+}
