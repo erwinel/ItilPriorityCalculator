@@ -8,170 +8,76 @@ namespace itilPriorityCalculator {
 
     declare type RangeString = "2" | "3" | "4" | "5" | "6" | "7";
     declare type BoolString = "true" | "false";
-    declare type RoundingType = "ceiling" | "floor" | "nearest";
-    declare type BaseFormulaType = keyof ICalculatorSets;
+    declare type SortDirection = -1 | 0 | 1;
 
-    interface ICalculators {
-        calculateUrgencyImpactVipBusinessCritical(context: IFullCalculationContext, calculationParameterSet: FullCalculationParameterSet): number;
-        calculateUrgencyImpactVip(context: IVipCalculationContext, calculationParameterSet: VipCalculationParameterSet): number;
-        calculateUrgencyImpactBusinessCritical(context: IBusinessCriticalCalculationContext, calculationParameterSet: BusinessCriticalCalculationParameterSet): number;
-        calculateUrgencyImpact(context: IUrgencyImpactCalculationContext, calculationParameterSet: UrgencyImpactCalculationParameterSet): number;
+    enum RoundingType {
+        ceiling = "ceiling",
+        floor = "floor",
+        nearest = "nearest"
     }
 
-    interface ICalculatorSets {
-        multiply: ICalculators;
-        add: ICalculators;
-        multiplyAdd: ICalculators;
-        addMultiply: ICalculators;
+    function isRoundingType(value: any): value is RoundingType {
+        return typeof value === 'string' && (value === RoundingType.ceiling || value === RoundingType.floor || value === RoundingType.nearest);
     }
 
-    class UrgencyImpactCalculationParameterSet {
+    enum BaseFormulaType {
+        multiply = "multiply",
+        add = "add",
+        multiplyAdd = "multiplyAdd",
+        addMultiply = "addMultiply"
+    }
+
+    enum ResultFieldName {
+        urgency = "urgency",
+        impact = "impact",
+        vip = "vip",
+        businessCritical = "businessCritical",
+        priority = "priority"
+    }
+
+    interface IFieldSortParameter {
+        field: ResultFieldName;
+        descending: boolean;
+    }
+
+    function isBaseFormulaType(value: any): value is BaseFormulaType {
+        return typeof value === 'string' && (value === BaseFormulaType.multiply || value === BaseFormulaType.add || value === BaseFormulaType.multiplyAdd || value === BaseFormulaType.addMultiply);
+    }
+    
+    interface ICalculationParameters {
         urgency: number;
         impact: number;
-        
-        constructor(urgency: number, impact: number) {
-            this.urgency = urgency;
-            this.impact = impact;
-        }
-
-        static getParameterSets(baseValue: number, urgencyRange: number, impactRange: number): UrgencyImpactCalculationParameterSet[] {
-            var arr: UrgencyImpactCalculationParameterSet[] = [];
-            var urgencyEnd: number = baseValue + urgencyRange;
-            var impactEnd: number = baseValue + impactRange;
-            for (var i = baseValue; i < impactEnd; i++) {
-                for (var u = baseValue; u < urgencyEnd; u++) {
-                    arr.push(new UrgencyImpactCalculationParameterSet(u, i));
-                }
-            }
-            return arr;
-        }
     }
     
-    class VipCalculationParameterSet {
-        urgency: number;
-        impact: number;
-        vip: boolean;
-        
-        constructor(urgency: number, impact: number, vip: boolean) {
-            this.urgency = urgency;
-            this.impact = impact;
-            this.vip = vip;
-        }
-
-        static getParameterSets(baseValue: number, urgencyRange: number, impactRange: number): VipCalculationParameterSet[] {
-            var arr: VipCalculationParameterSet[] = [];
-            var urgencyEnd: number = baseValue + urgencyRange;
-            var impactEnd: number = baseValue + impactRange;
-            for (var i = baseValue; i < impactEnd; i++) {
-                for (var u = baseValue; u < urgencyEnd; u++) {
-                    arr.push(new VipCalculationParameterSet(u, i, false));
-                    arr.push(new VipCalculationParameterSet(u, i, true));
-                }
-            }
-            return arr;
-        }
+    interface IIntermediateResult extends ICalculationParameters {
+        intermediateResult: number;
     }
     
-    class BusinessCriticalCalculationParameterSet {
-        urgency: number;
-        impact: number;
-        businessCritical: boolean;
-        
-        constructor(urgency: number, impact: number, businessCritical: boolean) {
-            this.urgency = urgency;
-            this.impact = impact;
-            this.businessCritical = businessCritical;
-        }
-
-        static getParameterSets(baseValue: number, urgencyRange: number, impactRange: number): BusinessCriticalCalculationParameterSet[] {
-            var arr: BusinessCriticalCalculationParameterSet[] = [];
-            var urgencyEnd: number = baseValue + urgencyRange;
-            var impactEnd: number = baseValue + impactRange;
-            for (var i = baseValue; i < impactEnd; i++) {
-                for (var u = baseValue; u < urgencyEnd; u++) {
-                    arr.push(new BusinessCriticalCalculationParameterSet(u, i, false));
-                    arr.push(new BusinessCriticalCalculationParameterSet(u, i, true));
-                }
-            }
-            return arr;
-        }
-    }
-    
-    class FullCalculationParameterSet {
-        urgency: number;
-        impact: number;
-        vip: boolean;
-        businessCritical: boolean;
-
-        constructor(urgency: number, impact: number, vip: boolean, businessCritical: boolean) {
-            this.urgency = urgency;
-            this.impact = impact;
-            this.vip = vip;
-            this.businessCritical = businessCritical;
-        }
-
-        static getParameterSets(baseValue: number, urgencyRange: number, impactRange: number): FullCalculationParameterSet[] {
-            var arr: FullCalculationParameterSet[] = [];
-            var urgencyEnd: number = baseValue + urgencyRange;
-            var impactEnd: number = baseValue + impactRange;
-            for (var i = baseValue; i < impactEnd; i++) {
-                for (var u = baseValue; u < urgencyEnd; u++) {
-                    arr.push(new FullCalculationParameterSet(u, i, false, false));
-                    arr.push(new FullCalculationParameterSet(u, i, false, true));
-                    arr.push(new FullCalculationParameterSet(u, i, true, false));
-                    arr.push(new FullCalculationParameterSet(u, i, true, true));
-                }
-            }
-            return arr;
-        }
-    }
-    
-    interface IUrgencyImpactCalculationContext {
-        baseValue: number;
-        urgencyRange: number;
-        impactRange: number;
-        valueShift: number;
-    }
-    
-    interface IVipCalculationContext extends IUrgencyImpactCalculationContext {
-        vipWeight: number;
-    }
-    
-    interface IBusinessCriticalCalculationContext extends IUrgencyImpactCalculationContext {
-        businessCriticalWeight: number;
-    }
-
-    interface IFullCalculationContext extends IVipCalculationContext, IBusinessCriticalCalculationContext { }
-    
-    interface IUrgencyImpactCalculationProduct {
-        urgency: number;
-        impact: number;
-        product: number;
-    }
-    
-    interface IVipCalculationProduct extends IUrgencyImpactCalculationProduct {
+    interface IVipCalculationParameters extends ICalculationParameters {
         vip: boolean;
     }
     
-    interface IBusinessCriticalCalculationProduct extends IUrgencyImpactCalculationProduct {
+    interface IVipIntermediateResult extends IVipCalculationParameters, IIntermediateResult  { }
+    
+    interface IBusinessCriticalCalculationParameters extends ICalculationParameters {
         businessCritical: boolean;
     }
-
-    interface IFullCalculationProduct extends IVipCalculationProduct, IBusinessCriticalCalculationProduct { }
-
-    declare type AnyCalculationProductArray = IFullCalculationProduct[] | IVipCalculationProduct[] | IBusinessCriticalCalculationProduct[] | IUrgencyImpactCalculationProduct[];
-
-    interface ICalculationResultRow {
-        urgency: number;
-        impact: number;
-        values: ("Yes" | "No")[];
+    
+    interface IBusinessCriticalIntermediateResult extends IBusinessCriticalCalculationParameters, IIntermediateResult  { }
+    
+    interface IAllCalculationParameters extends IVipCalculationParameters, IBusinessCriticalCalculationParameters { }
+    
+    interface IAllIntermediateResult extends IVipIntermediateResult, IBusinessCriticalIntermediateResult  { }
+    
+    interface ICalculationResultRow extends IIntermediateResult {
+        optionalValues: ("Yes" | "No")[];
         priority: number;
     }
     
     interface IMainControllerScope extends ng.IScope {
-        urgencyRange: RangeString;
-        impactRange: RangeString;
-        priorityRange: RangeString;
+        urgencyRange: string;
+        impactRange: string;
+        priorityRange: string;
         vipOption: boolean;
         businessCriticalOption: boolean;
         baseValue: number;
@@ -181,457 +87,749 @@ namespace itilPriorityCalculator {
         businessCriticalWeight: number;
         baseFormula: BaseFormulaType;
         formulaText: string;
-        headings: string[];
+        urgencySortDirection: SortDirection;
+        impactSortDirection: SortDirection;
+        vipSortDirection: SortDirection;
+        businessCriticalSortDirection: SortDirection;
+        prioritySortDirection: SortDirection;
         calculationResults: ICalculationResultRow[];
-        showRangesModal();
-        hideRangesModal();
-        showBaseFormulaModal();
-        hideBaseFormulaModal();
-        showOptionalValues();
-        hideOptionalValues();
-        showRoundingOptions();
-        hideRoundingOptions();
-    }
-
-    interface IResultMapContext {
-        priorityRange: number;
-        minValue: number;
-        productRange: number;
-        baseValue: number
-        round(value: number): number;
+        toggleUrgencySort(): boolean;
+        toggleImpactSort(): boolean;
+        toggleVipSort(): boolean;
+        toggleBusinessCriticalSort(): boolean;
+        togglePrioritySort(): boolean;
+        showRangesModal(): void;
+        hideRangesModal(): void;
+        showBaseFormulaModal(): void;
+        hideBaseFormulaModal(): void;
+        showOptionalValues(): void;
+        hideOptionalValues(): void;
+        showRoundingOptions(): void;
+        hideRoundingOptions(): void;
     }
 
     export let mainModule: angular.IModule = angular.module("mainModule", []);
 
     export class MainController {
         static $inject: Array<string> = ["$scope"];
-        constructor(private $scope: IMainControllerScope) {
-            $scope.urgencyRange = "3";
-            $scope.impactRange = "3";
-            $scope.priorityRange = "5";
-            $scope.vipOption = false;
-            $scope.businessCriticalOption = false;
-            $scope.baseValue = 1;
-            $scope.valueShift = 3;
-            $scope.rounding = "floor";
-            $scope.vipWeight = 1.5;
-            $scope.businessCriticalWeight = 0.5;
-            $scope.baseFormula = "multiply";
-            $scope.$watchGroup(["urgencyRange", "impactRange", "priorityRange", "vipOption", "businessCriticalOption", "baseValue", "valueShift", "rounding", "vipWeight", "businessCriticalWeight", "baseFormula"],
-                function(newValue: any, oldValue: any, scope: ng.IScope) {
-                    MainController.onCalculationParameterChanged(<IMainControllerScope>scope);
-                });
-            $scope.showRangesModal = function() {
-                $('#rangesModal').modal('show');
-            }
-            $scope.hideRangesModal = function() {
-                $('#rangesModal').modal('hide');
-            }
-            $scope.showBaseFormulaModal = function() {
-                $('#baseFormulaModal').modal('show');
-            }
-            $scope.hideBaseFormulaModal = function() {
-                $('#baseFormulaModal').modal('hide');
-            }
-            $scope.showOptionalValues = function() {
-                $('#optionalValuesModal').modal('show');
-            }
-            $scope.hideOptionalValues = function() {
-                $('#optionalValuesModal').modal('hide');
-            }
-            $scope.showRoundingOptions = function() {
-                $('#roundingOptionsModal').modal('show');
-            }
-            $scope.hideRoundingOptions = function() {
-                $('#roundingOptionsModal').modal('hide');
-            }
-            MainController.onCalculationParameterChanged($scope);
-        }
-        
-        static calculators: ICalculatorSets = {
-            multiply: {
-                calculateUrgencyImpactVipBusinessCritical: function(context: IFullCalculationContext, parameterSet: FullCalculationParameterSet): number {
-                    
-                    var product: number = (context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift) * (context.impactRange - parameterSet.impact + context.baseValue + context.valueShift);
-                    if (parameterSet.vip) product += context.vipWeight;
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpactVip: function(context: IVipCalculationContext, parameterSet: VipCalculationParameterSet): number {
-                    var product: number = (context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift) * (context.impactRange - parameterSet.impact + context.baseValue + context.valueShift);
-                    return parameterSet.vip ? product + context.vipWeight : product;
-                },
-                calculateUrgencyImpactBusinessCritical: function(context: IBusinessCriticalCalculationContext, parameterSet: BusinessCriticalCalculationParameterSet): number {
-                    var product: number = (context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift) * (context.impactRange - parameterSet.impact + context.baseValue + context.valueShift);
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpact: function(context: IUrgencyImpactCalculationContext, parameterSet: UrgencyImpactCalculationParameterSet): number {
-                    return (context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift) * (context.impactRange - parameterSet.impact + context.baseValue + context.valueShift);
-                }
-            },
-            add: {
-                calculateUrgencyImpactVipBusinessCritical: function(context: IFullCalculationContext, parameterSet: FullCalculationParameterSet): number {
-                    var product: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift + context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    if (parameterSet.vip) product += context.vipWeight;
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpactVip: function(context: IVipCalculationContext, parameterSet: VipCalculationParameterSet): number {
-                    var product: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift + context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    return parameterSet.vip ? product + context.vipWeight : product;
-                },
-                calculateUrgencyImpactBusinessCritical: function(context: IBusinessCriticalCalculationContext, parameterSet: BusinessCriticalCalculationParameterSet): number {
-                    var product: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift + context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpact: function(context: IUrgencyImpactCalculationContext, parameterSet: UrgencyImpactCalculationParameterSet): number {
-                    return context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift + context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                }
-            },
-            multiplyAdd: {
-                calculateUrgencyImpactVipBusinessCritical(context: IFullCalculationContext, parameterSet: FullCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    var product: number = (urgency * impact) + urgency + impact;
-                    if (parameterSet.vip) product += context.vipWeight;
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpactVip(context: IVipCalculationContext, parameterSet: VipCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    var product: number = (urgency * impact) + urgency + impact;
-                    return parameterSet.vip ? product + context.vipWeight : product;
-                },
-                calculateUrgencyImpactBusinessCritical(context: IBusinessCriticalCalculationContext, parameterSet: BusinessCriticalCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    var product: number = (urgency * impact) + urgency + impact;
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpact(context: IUrgencyImpactCalculationContext, parameterSet: UrgencyImpactCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    return (urgency * impact) + urgency + impact;
-                }
-            },
-            addMultiply: {
-                calculateUrgencyImpactVipBusinessCritical(context: IFullCalculationContext, parameterSet: FullCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    var product: number = (urgency + impact) * urgency * impact;
-                    if (parameterSet.vip) product += context.vipWeight;
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpactVip(context: IVipCalculationContext, parameterSet: VipCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    var product: number = (urgency + impact) * urgency * impact;
-                    return parameterSet.vip ? product + context.vipWeight : product;
-                },
-                calculateUrgencyImpactBusinessCritical(context: IBusinessCriticalCalculationContext, parameterSet: BusinessCriticalCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    var product: number = (urgency + impact) * urgency * impact;
-                    return parameterSet.businessCritical ? product + context.businessCriticalWeight : product;
-                },
-                calculateUrgencyImpact(context: IUrgencyImpactCalculationContext, parameterSet: UrgencyImpactCalculationParameterSet): number {
-                    var urgency: number = context.impactRange - parameterSet.urgency + context.baseValue + context.valueShift;
-                    var impact: number = context.impactRange - parameterSet.impact + context.baseValue + context.valueShift;
-                    return (urgency + impact) * urgency * impact;
-                }
-            }
-        };
+        private _urgencyRange: number = 3;
+        private _impactRange: number = 3;
+        private _priorityRange: number = 5;
+        private _vipOption: boolean = false;
+        private _businessCriticalOption: boolean = false;
+        private _baseValue: number = 1;
+        private _valueShift: number = 3;
+        private _rounding: RoundingType = RoundingType.floor;
+        private _vipWeight: number = 4;
+        private _businessCriticalWeight: number = 2;
+        private _baseFormula: BaseFormulaType = BaseFormulaType.multiply;
+        private _minIntermediateResult: number = 16;
+        private _intermediateResultRange: number = 26;
+        private _sortOrder: IFieldSortParameter[] = [
+            { field: ResultFieldName.priority, descending: false },
+            { field: ResultFieldName.impact, descending: false },
+            { field: ResultFieldName.urgency, descending: false },
+            { field: ResultFieldName.vip, descending: false },
+            { field: ResultFieldName.businessCritical, descending: false }
+        ];
 
-        static isUrgencyImpactCalculationProductExcplicit(value: IUrgencyImpactCalculationProduct): value is IVipCalculationProduct {
-            return typeof value === 'object' && value !== null && typeof (<IVipCalculationProduct>value).vip !== 'boolean' && typeof (<IBusinessCriticalCalculationProduct>value).businessCritical !== 'boolean';
-        }
-        
-        static isVipCalculationProduct(value: IUrgencyImpactCalculationProduct, explicit?: boolean): value is IVipCalculationProduct {
-            return typeof value === 'object' && value !== null && typeof (<IVipCalculationProduct>value).vip === 'boolean' &&
-                !(explicit && typeof (<IBusinessCriticalCalculationProduct>value).businessCritical !== 'boolean'); 
-        }
-        
-        static isBusinessCriticalCalculationProduct(value: IUrgencyImpactCalculationProduct, explicit?: boolean): value is IVipCalculationProduct {
-            return typeof value === 'object' && value !== null && typeof (<IBusinessCriticalCalculationProduct>value).businessCritical === 'boolean' &&
-                !(explicit && typeof (<IVipCalculationProduct>value).vip !== 'boolean'); 
-        }
-        
-        static isFullCalculationProduct(value: IUrgencyImpactCalculationProduct): value is IFullCalculationProduct {
-            return typeof value === 'object' && value !== null && typeof (<IVipCalculationProduct>value).vip === 'boolean' && typeof (<IBusinessCriticalCalculationProduct>value).businessCritical === 'boolean'; 
-        }
-        
-        static isUrgencyImpactParameterSet(arr: AnyCalculationProductArray): arr is IUrgencyImpactCalculationProduct[] {
-            if (!Array.isArray(arr)) return false;
-            for (var i = 0; i < arr.length; i++)
-            {
-                var e = arr[i];
-                if (typeof e === 'object' && e !== null) return MainController.isUrgencyImpactCalculationProductExcplicit(e);
-            }
-            return true;
-        }
-    
-        static implementsVipParameterSetArray(arr: AnyCalculationProductArray): arr is (IVipCalculationProduct[] | IFullCalculationProduct[]) {
-            if (!Array.isArray(arr)) return false;
-            for (var i = 0; i < arr.length; i++)
-            {
-                var e = arr[i];
-                if (typeof e === 'object' && e !== null) return MainController.isVipCalculationProduct(e);
-            }
-            return true;
-        }
-    
-        static isVipParameterSetArray(arr: AnyCalculationProductArray): arr is IVipCalculationProduct[] {
-            if (!Array.isArray(arr)) return false;
-            for (var i = 0; i < arr.length; i++)
-            {
-                var e = arr[i];
-                if (typeof e === 'object' && e !== null) return MainController.isVipCalculationProduct(e, true);
-            }
-            return true;
-        }
-    
-        static implementsBusinessCriticalParameterSetArray(arr: AnyCalculationProductArray): arr is (IBusinessCriticalCalculationProduct | IFullCalculationProduct)[] {
-            if (!Array.isArray(arr)) return false;
-            for (var i = 0; i < arr.length; i++)
-            {
-                var e = arr[i];
-                if (typeof e === 'object' && e !== null) return MainController.isBusinessCriticalCalculationProduct(e, false);
-            }
-            return true;
-        }
-    
-        static isBusinessCriticalParameterSetArray(arr: AnyCalculationProductArray): arr is IBusinessCriticalCalculationProduct[] {
-            if (!Array.isArray(arr)) return false;
-            for (var i = 0; i < arr.length; i++)
-            {
-                var e = arr[i];
-                if (typeof e === 'object' && e !== null) return MainController.isBusinessCriticalCalculationProduct(e, true);
-            }
-            return true;
-        }
-    
-        static isFullCalculationParameterSetArray(arr: AnyCalculationProductArray): arr is IFullCalculationProduct[] {
-            if (!Array.isArray(arr)) return false;
-            for (var i = 0; i < arr.length; i++)
-            {
-                var e = arr[i];
-                if (typeof e === 'object' && e !== null) return MainController.isFullCalculationProduct(e);
-            }
-            return true;
-        }
-    
-        static onCalculationParameterChanged(scope: IMainControllerScope): void {
-            var baseValue: number = (typeof scope.baseValue === 'number') ? scope.baseValue :  parseFloat('' + scope.baseValue);
-            var urgencyRange: number = parseInt(scope.urgencyRange);
-            var impactRange: number = parseInt(scope.impactRange);
-            var priorityRange: number = parseInt(scope.priorityRange);
-            if (typeof baseValue !== 'number' || isNaN(baseValue) || typeof urgencyRange !== 'number' || isNaN(urgencyRange) || urgencyRange < 2 || typeof impactRange !== 'number' || isNaN(impactRange) ||
-                impactRange < 2 || typeof priorityRange !== 'number' || isNaN(priorityRange) || priorityRange < 2 || typeof scope.valueShift !== 'number' || isNaN(scope.valueShift)) return;
-            var minValue: number;
-            var productRange: number;
-            var formulaText: string;
-            if (scope.vipOption) {
-                if (typeof scope.vipWeight !== 'number' || isNaN(scope.vipWeight)) return;
-                if (scope.businessCriticalOption) {
-                    if (typeof scope.businessCriticalWeight !== 'number' || isNaN(scope.businessCriticalWeight)) return;
-                    var fullContext: FullCalculationMapContext = {
-                        baseValue: baseValue,
-                        businessCriticalWeight: scope.businessCriticalWeight,
-                        vipWeight: scope.vipWeight,
-                        valueShift: scope.valueShift,
-                        impactRange: impactRange,
-                        urgencyRange: urgencyRange,
-                        calculators: this.calculators[scope.baseFormula],
-                        baseFormula: scope.baseFormula
-                    };
-                    minValue = this.calculators[scope.baseFormula].calculateUrgencyImpactVipBusinessCritical(fullContext, { urgency: baseValue + urgencyRange - 1, impact: baseValue + impactRange - 1, vip: true,
-                        businessCritical: true });
-                    var fullProductResult: IFullCalculationProduct[] = FullCalculationParameterSet.getParameterSets(baseValue, urgencyRange, impactRange).map(function(this: FullCalculationMapContext,
-                            parameterSet: FullCalculationParameterSet): IFullCalculationProduct {
-                        return {
-                            urgency: parameterSet.urgency,
-                            impact: parameterSet.impact,
-                            vip: parameterSet.vip,
-                            businessCritical: parameterSet.businessCritical,
-                            product: this.calculators.calculateUrgencyImpactVipBusinessCritical(this, parameterSet)
-                        };
-                    }, fullContext);
-                    fullProductResult.sort(function(a: IFullCalculationProduct, b: IFullCalculationProduct): number {
-                        var diff: number = b.product - a.product;
-                        if (diff != 0 || (diff = a.impact - b.impact) != 0 || (diff = a.urgency - b.urgency) != 0) return diff;
-                        if (a.vip) {
-                            if (!b.vip) return -1;
-                        }
-                        else if (b.vip) return 1;
-                        if (a.businessCritical) return b.businessCritical ? 0 : -1;
-                        return b.businessCritical ? 1 : 0;
-                        
-                    });
-                    productRange = this.calculators[scope.baseFormula].calculateUrgencyImpactVipBusinessCritical(fullContext,
-                        { urgency: baseValue, impact: baseValue, vip: false, businessCritical: false }) - minValue;
-                    scope.calculationResults = fullProductResult.map(function(this: IResultMapContext, result: IFullCalculationProduct): ICalculationResultRow {
-                        return {
-                            urgency: result.urgency,
-                            impact: result.impact,
-                            priority: this.round(this.priorityRange - 1 - ((this.priorityRange - 1) * ((result.product - this.minValue) / this.productRange)) + this.baseValue),
-                            values: [result.vip ? "Yes" : "No", result.businessCritical ? "Yes" : "No"]
-                        };
-                    }, {
-                        priorityRange: priorityRange,
-                        minValue: minValue,
-                        productRange: productRange,
-                        baseValue: baseValue,
-                        round: (scope.rounding == "floor") ? function(value: number): number { return Math.floor(value); } :
-                            (scope.rounding == "nearest") ? function(value: number): number { return Math.round(value); } :
-                            function(value: number): number { return Math.ceil(value); }
-                    });
-                    scope.headings = ["VIP", "Business Critical"];
-                    var allWeight: number = scope.vipWeight + scope.businessCriticalWeight;
-                } else {
-                    var vipContext: VipCalculationMapContext = {
-                        baseValue: baseValue,
-                        vipWeight: scope.vipWeight,
-                        valueShift: scope.valueShift,
-                        impactRange: impactRange,
-                        urgencyRange: urgencyRange,
-                        calculators: this.calculators[scope.baseFormula],
-                        baseFormula: scope.baseFormula
-                    };
-                    minValue = this.calculators[scope.baseFormula].calculateUrgencyImpactVip(vipContext, { urgency: baseValue + urgencyRange - 1, impact: baseValue + impactRange - 1, vip: false });
-                    var vipProductResult: IVipCalculationProduct[] = VipCalculationParameterSet.getParameterSets(baseValue, urgencyRange, impactRange).map(function(this: VipCalculationMapContext,
-                            parameterSet: VipCalculationParameterSet): IVipCalculationProduct {
-                        return {
-                            urgency: parameterSet.urgency,
-                            impact: parameterSet.impact,
-                            vip: parameterSet.vip,
-                            product: this.calculators.calculateUrgencyImpactVip(this, parameterSet)
-                        };
-                    }, vipContext);
-                    vipProductResult.sort(function(a: IVipCalculationProduct, b: IVipCalculationProduct): number {
-                        var diff: number = b.product - a.product;
-                        return (diff != 0 || (diff = a.impact - b.impact) != 0 || (diff = a.urgency - b.urgency) != 0) ? diff : a.urgency ? (b.urgency ? 0 : -1) : b.urgency ? 1 : 0;
-                        
-                    });
-                    productRange = this.calculators[scope.baseFormula].calculateUrgencyImpactVip(vipContext, { urgency: baseValue, impact: baseValue, vip: false }) - minValue;
-                    scope.calculationResults = vipProductResult.map(function(this: IResultMapContext, result: IVipCalculationProduct): ICalculationResultRow {
-                        return {
-                            urgency: result.urgency,
-                            impact: result.impact,
-                            priority: this.round(this.priorityRange - 1 - ((this.priorityRange - 1) * ((result.product - this.minValue) / this.productRange)) + this.baseValue),
-                            values: [result.vip ? "Yes" : "No"]
-                        };
-                    }, {
-                        priorityRange: priorityRange,
-                        minValue: minValue,
-                        productRange: productRange,
-                        baseValue: baseValue,
-                        round: (scope.rounding == "floor") ? function(value: number): number { return Math.floor(value); } :
-                            (scope.rounding == "nearest") ? function(value: number): number { return Math.round(value); } :
-                            function(value: number): number { return Math.ceil(value); }
-                    });
-                    scope.headings = ["VIP"];
+        constructor(private $scope: IMainControllerScope) {
+            $scope.urgencyRange = '' + this._urgencyRange;
+            $scope.impactRange = '' + this._impactRange;
+            $scope.priorityRange = '' + this._priorityRange;
+            $scope.vipOption = this._vipOption;
+            $scope.businessCriticalOption = this._businessCriticalOption;
+            $scope.baseValue = this._baseValue;
+            $scope.valueShift = this._valueShift;
+            $scope.rounding = this._rounding;
+            $scope.vipWeight = this._vipWeight;
+            $scope.businessCriticalWeight = this._businessCriticalWeight;
+            $scope.baseFormula = this._baseFormula;
+            $scope.urgencySortDirection = 0;
+            $scope.impactSortDirection = 0;
+            $scope.vipSortDirection = 0;
+            $scope.businessCriticalSortDirection = 0;
+            $scope.prioritySortDirection = 1;
+            let controller: MainController = this;
+            $scope.$watch('urgencyRange', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                let value: number = parseInt('' + newValue);
+                if (!isNaN(value)) controller.onUrgencyRangeChanged(value);
+            });
+            $scope.$watch('impactRange', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                let value: number = parseInt('' + newValue);
+                if (!isNaN(value)) controller.onImpactRangeChanged(value);
+            });
+            $scope.$watch('priorityRange', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                let value: number = parseInt('' + newValue);
+                if (!isNaN(value)) controller.onPriorityRangeChanged(value);
+            });
+            $scope.$watch('vipOption', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                controller.onVipOptionChanged(newValue == true);
+            });
+            $scope.$watch('businessCriticalOption', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                controller.onBusinessCriticalOptionChanged(newValue == true);
+            });
+            $scope.$watch('baseValue', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                if (typeof newValue === 'number') {
+                    if (!isNaN(newValue)) controller.onBaseValueChanged(newValue);
+                } else if (typeof newValue === 'string') {
+                    let value: number = parseInt(newValue);
+                    if (!isNaN(value)) controller.onBaseValueChanged(value);
                 }
-            } else if (scope.businessCriticalOption) {
-                if (typeof scope.businessCriticalWeight !== 'number' || isNaN(scope.businessCriticalWeight)) return;
-                var bcContext: BusinessCriticalCalculationMapContext = {
-                    baseValue: baseValue,
-                    businessCriticalWeight: scope.businessCriticalWeight,
-                    valueShift: scope.valueShift,
-                    impactRange: impactRange,
-                    urgencyRange: urgencyRange,
-                    calculators: this.calculators[scope.baseFormula],
-                    baseFormula: scope.baseFormula
-                };
-                minValue = this.calculators[scope.baseFormula].calculateUrgencyImpactBusinessCritical(bcContext, { urgency: baseValue + urgencyRange - 1, impact: baseValue + impactRange - 1, businessCritical: false });
-                var bcProductResult: IBusinessCriticalCalculationProduct[] = BusinessCriticalCalculationParameterSet.getParameterSets(baseValue, urgencyRange, impactRange).map(function(this: BusinessCriticalCalculationMapContext,
-                        parameterSet: BusinessCriticalCalculationParameterSet): IBusinessCriticalCalculationProduct {
-                    return {
-                        urgency: parameterSet.urgency,
-                        impact: parameterSet.impact,
-                        businessCritical: parameterSet.businessCritical,
-                        product: this.calculators.calculateUrgencyImpactBusinessCritical(this, parameterSet)
-                    };
-                }, bcContext);
-                bcProductResult.sort(function(a: IBusinessCriticalCalculationProduct, b: IBusinessCriticalCalculationProduct): number {
-                    var diff: number = b.product - a.product;
-                    return (diff != 0 || (diff = a.impact - b.impact) != 0 || (diff = a.urgency - b.urgency) != 0) ? diff : a.businessCritical ? (b.businessCritical ? 0 : -1) : b.businessCritical ? 1 : 0;
-                    
+            });
+            $scope.$watch('valueShift', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                if (typeof newValue === 'number') {
+                    if (!isNaN(newValue)) controller.onValueShiftChanged(newValue);
+                } else if (typeof newValue === 'string') {
+                    let value: number = parseInt(newValue);
+                    if (!isNaN(value)) controller.onValueShiftChanged(value);
+                }
+            });
+            $scope.$watch('rounding', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                if (isRoundingType(newValue)) controller.onRoundingChanged(newValue);
+            });
+            $scope.$watch('vipWeight', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                if (typeof newValue === 'number') {
+                    if (!isNaN(newValue)) controller.onVipWeightChanged(newValue);
+                } else if (typeof newValue === 'string') {
+                    let value: number = parseFloat(newValue);
+                    if (!isNaN(value)) controller.onVipWeightChanged(value);
+                }
+            });
+            $scope.$watch('businessCriticalWeight', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                if (typeof newValue === 'number') {
+                    if (!isNaN(newValue)) controller.onBusinessCriticalWeightChanged(newValue);
+                } else if (typeof newValue === 'string') {
+                    let value: number = parseFloat(newValue);
+                    if (!isNaN(value)) controller.onBusinessCriticalWeightChanged(value);
+                }
+            });
+            $scope.$watch('baseFormula', function(newValue: any, oldValue: any, scope: ng.IScope): void {
+                if (isBaseFormulaType(newValue)) controller.onBaseFormulaChanged(newValue);
+            });
+            $scope.showRangesModal = function(): void { $('#rangesModal').modal('show'); };
+            $scope.hideRangesModal = function(): void { $('#rangesModal').modal('hide'); };
+            $scope.showBaseFormulaModal = function(): void { $('#baseFormulaModal').modal('show'); };
+            $scope.hideBaseFormulaModal = function(): void { $('#baseFormulaModal').modal('hide'); };
+            $scope.showOptionalValues = function(): void { $('#optionalValuesModal').modal('show'); };
+            $scope.hideOptionalValues = function(): void { $('#optionalValuesModal').modal('hide'); };
+            $scope.showRoundingOptions = function(): void { $('#roundingOptionsModal').modal('show'); };
+            $scope.hideRoundingOptions = function(): void { $('#roundingOptionsModal').modal('hide'); };
+            $scope.toggleUrgencySort = function(): boolean { controller.toggleSort(ResultFieldName.urgency); return false; }
+            $scope.toggleImpactSort = function(): boolean { controller.toggleSort(ResultFieldName.impact); return false; }
+            $scope.toggleVipSort = function(): boolean { controller.toggleSort(ResultFieldName.vip); return false; }
+            $scope.toggleBusinessCriticalSort = function(): boolean { controller.toggleSort(ResultFieldName.businessCritical); return false; }
+            $scope.togglePrioritySort = function(): boolean { controller.toggleSort(ResultFieldName.priority); return false; }
+            this.recalculate();
+        }
+
+        applySort(): void {
+            var sortOrder: IFieldSortParameter[] = this._sortOrder;
+            var lastIndex: number = sortOrder.length = 1;
+            switch (sortOrder[0].field) {
+                case ResultFieldName.urgency:
+                    this.$scope.urgencySortDirection = sortOrder[0].descending ? -1 : 1;
+                    this.$scope.impactSortDirection = 0;
+                    this.$scope.vipSortDirection = 0;
+                    this.$scope.businessCriticalSortDirection = 0;
+                    this.$scope.prioritySortDirection = 0;
+                    break;
+                case ResultFieldName.impact:
+                    this.$scope.impactSortDirection = sortOrder[0].descending ? -1 : 1;
+                    this.$scope.urgencySortDirection = 0;
+                    this.$scope.vipSortDirection = 0;
+                    this.$scope.businessCriticalSortDirection = 0;
+                    this.$scope.prioritySortDirection = 0;
+                    break;
+                case ResultFieldName.vip:
+                    this.$scope.vipSortDirection = sortOrder[0].descending ? -1 : 1;
+                    this.$scope.urgencySortDirection = 0;
+                    this.$scope.impactSortDirection = 0;
+                    this.$scope.businessCriticalSortDirection = 0;
+                    this.$scope.prioritySortDirection = 0;
+                    break;
+                case ResultFieldName.businessCritical:
+                    this.$scope.businessCriticalSortDirection = sortOrder[0].descending ? -1 : 1;
+                    this.$scope.urgencySortDirection = 0;
+                    this.$scope.impactSortDirection = 0;
+                    this.$scope.vipSortDirection = 0;
+                    this.$scope.prioritySortDirection = 0;
+                    break;
+                default:
+                    this.$scope.prioritySortDirection = sortOrder[0].descending ? -1 : 1;
+                    this.$scope.urgencySortDirection = 0;
+                    this.$scope.impactSortDirection = 0;
+                    this.$scope.vipSortDirection = 0;
+                    this.$scope.businessCriticalSortDirection = 0;
+                    break;
+            }
+            if (this._vipOption)
+            {
+                if (this._businessCriticalOption) {
+                    this.$scope.calculationResults.sort(function(a: ICalculationResultRow, b: ICalculationResultRow): number {
+                        var index: number = lastIndex;
+                        var diff: number;
+                        do {
+                            var sortParameter: IFieldSortParameter = sortOrder[index];
+                            switch (sortParameter.field) {
+                                case ResultFieldName.impact:
+                                    if ((diff = sortParameter.descending ? b.impact - a.impact : a.impact - b.impact) != 0) return diff;
+                                    break;
+                                case ResultFieldName.urgency:
+                                    if ((diff = sortParameter.descending ? b.urgency - a.urgency : a.urgency - b.urgency) != 0) return diff;
+                                    break;
+                                case ResultFieldName.vip:
+                                    if (a.optionalValues[0] == "Yes") {
+                                        if (b.optionalValues[0] != "Yes") return sortParameter.descending ? 1 : -1;
+                                    }
+                                    else if (b.optionalValues[0] == "Yes") return sortParameter.descending ? -1 : 1;
+                                    break;
+                                case ResultFieldName.businessCritical:
+                                    if (a.optionalValues[1] == "Yes") {
+                                        if (b.optionalValues[1] != "Yes") return sortParameter.descending ? 1 : -1;
+                                    }
+                                    else if (b.optionalValues[1] == "Yes") return sortParameter.descending ? -1 : 1;
+                                    break;
+                                default:
+                                    if ((diff = sortParameter.descending ? a.intermediateResult - b.intermediateResult : b.intermediateResult - a.intermediateResult) != 0) return diff;
+                                    break;
+                            }
+                        } while (--index >- 0);
+                        return 0;
+                    });
+                } else {
+                    this.$scope.calculationResults.sort(function(a: ICalculationResultRow, b: ICalculationResultRow): number {
+                        var index: number = lastIndex;
+                        var diff: number;
+                        do {
+                            var sortParameter: IFieldSortParameter = sortOrder[index];
+                            switch (sortParameter.field) {
+                                case ResultFieldName.impact:
+                                    if ((diff = sortParameter.descending ? b.impact - a.impact : a.impact - b.impact) != 0) return diff;
+                                    break;
+                                case ResultFieldName.urgency:
+                                    if ((diff = sortParameter.descending ? b.urgency - a.urgency : a.urgency - b.urgency) != 0) return diff;
+                                    break;
+                                case ResultFieldName.priority:
+                                    if ((diff = sortParameter.descending ? a.intermediateResult - b.intermediateResult : b.intermediateResult - a.intermediateResult) != 0) return diff;
+                                    break;
+                                case ResultFieldName.vip:
+                                    if (a.optionalValues[0] == "Yes") {
+                                        if (b.optionalValues[0] != "Yes") return sortParameter.descending ? 1 : -1;
+                                    }
+                                    else if (b.optionalValues[0] == "Yes") return sortParameter.descending ? -1 : 1;
+                                    break;
+                            }
+                        } while (--index >- 0);
+                        return 0;
+                    });
+                }
+            } else if (this._businessCriticalOption) {
+                this.$scope.calculationResults.sort(function(a: ICalculationResultRow, b: ICalculationResultRow): number {
+                    var index: number = lastIndex;
+                    var diff: number;
+                    do {
+                        var sortParameter: IFieldSortParameter = sortOrder[index];
+                        switch (sortParameter.field) {
+                            case ResultFieldName.impact:
+                                if ((diff = sortParameter.descending ? b.impact - a.impact : a.impact - b.impact) != 0) return diff;
+                                break;
+                            case ResultFieldName.urgency:
+                                if ((diff = sortParameter.descending ? b.urgency - a.urgency : a.urgency - b.urgency) != 0) return diff;
+                                break;
+                            case ResultFieldName.priority:
+                                if ((diff = sortParameter.descending ? a.intermediateResult - b.intermediateResult : b.intermediateResult - a.intermediateResult) != 0) return diff;
+                                break;
+                            case ResultFieldName.businessCritical:
+                                if (a.optionalValues[1] == "Yes") {
+                                    if (b.optionalValues[1] != "Yes") return sortParameter.descending ? 1 : -1;
+                                }
+                                else if (b.optionalValues[1] == "Yes") return sortParameter.descending ? -1 : 1;
+                                break;
+                        }
+                    } while (--index >- 0);
+                    return 0;
                 });
-                productRange = this.calculators[scope.baseFormula].calculateUrgencyImpactBusinessCritical(bcContext, { urgency: baseValue, impact: baseValue, businessCritical: false }) - minValue;
-                scope.calculationResults = bcProductResult.map(function(this: IResultMapContext, result: IBusinessCriticalCalculationProduct): ICalculationResultRow {
-                    return {
-                        urgency: result.urgency,
-                        impact: result.impact,
-                        priority: this.round(this.priorityRange - 1 - ((this.priorityRange - 1) * ((result.product - this.minValue) / this.productRange)) + this.baseValue),
-                        values: [result.businessCritical ? "Yes" : "No"]
-                    };
-                }, {
-                    priorityRange: priorityRange,
-                    minValue: minValue,
-                    productRange: productRange,
-                    baseValue: baseValue,
-                    round: (scope.rounding == "floor") ? function(value: number): number { return Math.floor(value); } :
-                        (scope.rounding == "nearest") ? function(value: number): number { return Math.round(value); } :
-                        function(value: number): number { return Math.ceil(value); }
-                });
-                scope.headings = ["Business Critical"];
             } else {
-                var context: UrgencyImpactCalculationMapContext = {
-                    baseValue: baseValue,
-                    valueShift: scope.valueShift,
-                    impactRange: impactRange,
-                    urgencyRange: urgencyRange,
-                    calculators: this.calculators[scope.baseFormula],
-                    baseFormula: scope.baseFormula
-                };
-                minValue = this.calculators[scope.baseFormula].calculateUrgencyImpact(context, { urgency: baseValue + urgencyRange - 1, impact: baseValue + impactRange - 1 });
-                var productResult: IUrgencyImpactCalculationProduct[] = UrgencyImpactCalculationParameterSet.getParameterSets(baseValue, urgencyRange, impactRange).map(function(this: UrgencyImpactCalculationMapContext,
-                        parameterSet: UrgencyImpactCalculationParameterSet): IUrgencyImpactCalculationProduct {
-                    return {
-                        urgency: parameterSet.urgency,
-                        impact: parameterSet.impact,
-                        product: this.calculators.calculateUrgencyImpact(this, parameterSet)
-                    };
-                }, context);
-                productResult.sort(function(a: IUrgencyImpactCalculationProduct, b: IUrgencyImpactCalculationProduct): number {
-                    var diff: number = b.product - a.product;
-                    return (diff == 0 && (diff = a.impact - b.impact) == 0) ? a.urgency - b.urgency : diff;
-                    
+                this.$scope.calculationResults.sort(function(a: ICalculationResultRow, b: ICalculationResultRow): number {
+                    var index: number = lastIndex;
+                    var diff: number;
+                    do {
+                        var sortParameter: IFieldSortParameter = sortOrder[index];
+                        switch (sortParameter.field) {
+                            case ResultFieldName.impact:
+                                if ((diff = sortParameter.descending ? b.impact - a.impact : a.impact - b.impact) != 0) return diff;
+                                break;
+                            case ResultFieldName.urgency:
+                                if ((diff = sortParameter.descending ? b.urgency - a.urgency : a.urgency - b.urgency) != 0) return diff;
+                                break;
+                            case ResultFieldName.priority:
+                                if ((diff = sortParameter.descending ? a.intermediateResult - b.intermediateResult : b.intermediateResult - a.intermediateResult) != 0) return diff;
+                                break;
+                        }
+                    } while (--index >- 0);
+                    return 0;
                 });
-                productRange = this.calculators[scope.baseFormula].calculateUrgencyImpact(context, { urgency: baseValue, impact: baseValue }) - minValue;
-                scope.calculationResults = productResult.map(function(this: IResultMapContext, result: IUrgencyImpactCalculationProduct): ICalculationResultRow {
-                    return {
-                        urgency: result.urgency,
-                        impact: result.impact,
-                        priority: this.round(this.priorityRange - 1 - ((this.priorityRange - 1) * ((result.product - this.minValue) / this.productRange)) + this.baseValue),
-                        values: []
-                    };
-                }, {
-                    priorityRange: priorityRange,
-                    minValue: minValue,
-                    productRange: productRange,
-                    baseValue: baseValue,
-                    round: (scope.rounding == "floor") ? function(value: number): number { return Math.floor(value); } :
-                        (scope.rounding == "nearest") ? function(value: number): number { return Math.round(value); } :
-                        function(value: number): number { return Math.ceil(value); }
-                });
-                scope.headings = [];
             }
         }
+
+        toggleSort(field: ResultFieldName): void {
+            var index: number = this._sortOrder.findIndex(function(value: IFieldSortParameter): boolean { return value.field == field; });
+            if (index == 0)
+                this._sortOrder[0] = { field: field, descending: !this._sortOrder[0].descending };
+            else {
+                var item: IFieldSortParameter = this._sortOrder[index];
+                if (index < this._sortOrder.length - 1)
+                    this._sortOrder.splice(index, 1);
+                else
+                    this._sortOrder.pop();
+                this._sortOrder.unshift(item);
+            }
+            this.applySort();
+        }
+
+        private getAllParametersProduct(parameters: IAllCalculationParameters): number {
+            var result: number = this.getUrgencyImpactOnlyParametersProduct(parameters);
+            if (parameters.vip) result += this._vipWeight;
+            return parameters.businessCritical ? result + this._businessCriticalWeight : result;
+        }
+        
+        private getAllParametersSum(parameters: IAllCalculationParameters): number {
+            var result: number = this.getUrgencyImpactOnlyParametersSum(parameters);
+            if (parameters.vip) result += this._vipWeight;
+            return parameters.businessCritical ? result + this._businessCriticalWeight : result;
+        }
+        
+        private getAllParametersProductWithSum(parameters: IAllCalculationParameters): number {
+            var result: number = this.getUrgencyImpactOnlyParametersProductWithSum(parameters);
+            if (parameters.vip) result += this._vipWeight;
+            return parameters.businessCritical ? result + this._businessCriticalWeight : result;
+        }
+        
+        private getAllParametersSumWithProduct(parameters: IAllCalculationParameters): number {
+            var result: number =this.getUrgencyImpactOnlyParametersSumWithProduct(parameters);
+            if (parameters.vip) result += this._vipWeight;
+            return parameters.businessCritical ? result + this._businessCriticalWeight : result;
+        }
+        
+        private getVipParametersProduct(parameters: IVipCalculationParameters): number {
+            return (parameters.vip) ? this.getUrgencyImpactOnlyParametersProduct(parameters) + this._vipWeight : this.getUrgencyImpactOnlyParametersProduct(parameters);
+        }
+        
+        private getVipParametersSum(parameters: IVipCalculationParameters): number {
+            return (parameters.vip) ? this.getUrgencyImpactOnlyParametersSum(parameters) + this._vipWeight : this.getUrgencyImpactOnlyParametersSum(parameters);
+        }
+        
+        private getVipParametersProductWithSum(parameters: IVipCalculationParameters): number {
+            return (parameters.vip) ? this.getUrgencyImpactOnlyParametersProductWithSum(parameters) + this._vipWeight : this.getUrgencyImpactOnlyParametersProductWithSum(parameters);
+        }
+        
+        private getVipParametersSumWithProduct(parameters: IVipCalculationParameters): number {
+            return (parameters.vip) ? this.getUrgencyImpactOnlyParametersSumWithProduct(parameters) + this._vipWeight : this.getUrgencyImpactOnlyParametersSumWithProduct(parameters);
+        }
+        
+        private getBusinessCriticalParametersProduct(parameters: IBusinessCriticalCalculationParameters): number {
+            return parameters.businessCritical ? this.getUrgencyImpactOnlyParametersProduct(parameters) + this._businessCriticalWeight : this.getUrgencyImpactOnlyParametersProduct(parameters);
+        }
+        
+        private getBusinessCriticalParametersSum(parameters: IBusinessCriticalCalculationParameters): number {
+            return parameters.businessCritical ? this.getUrgencyImpactOnlyParametersSum(parameters) + this._businessCriticalWeight : this.getUrgencyImpactOnlyParametersSum(parameters);
+        }
+        
+        private getBusinessCriticalParametersProductWithSum(parameters: IBusinessCriticalCalculationParameters): number {
+            return parameters.businessCritical ? this.getUrgencyImpactOnlyParametersProductWithSum(parameters) + this._businessCriticalWeight : this.getUrgencyImpactOnlyParametersProductWithSum(parameters);
+        }
+        
+        private getBusinessCriticalParametersSumWithProduct(parameters: IBusinessCriticalCalculationParameters): number {
+            return parameters.businessCritical ? this.getUrgencyImpactOnlyParametersSumWithProduct(parameters) + this._businessCriticalWeight : this.getUrgencyImpactOnlyParametersSumWithProduct(parameters);
+        }
+        
+        private getUrgencyImpactOnlyParametersProduct(parameters: ICalculationParameters): number {
+            return (this._urgencyRange - parameters.urgency + this._baseValue + this._valueShift) * (this._impactRange - parameters.impact + this._baseValue + this._valueShift);
+        }
+        
+        private getUrgencyImpactOnlyParametersSum(parameters: ICalculationParameters): number {
+            return this._urgencyRange - parameters.urgency + this._baseValue + this._valueShift + this._impactRange - parameters.impact + this._baseValue + this._valueShift;
+        }
+        
+        private getUrgencyImpactOnlyParametersProductWithSum(parameters: ICalculationParameters): number {
+            var urgency: number = this._urgencyRange - parameters.urgency + this._baseValue + this._valueShift;
+            var impact: number = this._impactRange - parameters.impact + this._baseValue + this._valueShift;
+            return (urgency * impact) + urgency + impact;
+        }
+        
+        private getUrgencyImpactOnlyParametersSumWithProduct(parameters: ICalculationParameters): number {
+            var urgency: number = this._urgencyRange - parameters.urgency + this._baseValue + this._valueShift;
+            var impact: number = this._impactRange - parameters.impact + this._baseValue + this._valueShift;
+            return (urgency + impact) * urgency + impact;
+        }
+        
+        private getAllOptionsCalculationParameters(): IAllCalculationParameters[] {
+            var result: IAllCalculationParameters[] = [];
+            var urgencyEnd: number = this._baseValue + this._urgencyRange;
+            var impactEnd: number = this._baseValue + this._impactRange;
+            for (var urgency: number = this._baseValue; urgency < urgencyEnd; urgency++) {
+                for (var impact: number = this._baseValue; impact < impactEnd; impact++) {
+                    result.push({ urgency: urgency, impact: impact, vip: false, businessCritical: false });
+                    result.push({ urgency: urgency, impact: impact, vip: false, businessCritical: true });
+                    result.push({ urgency: urgency, impact: impact, vip: true, businessCritical: false });
+                    result.push({ urgency: urgency, impact: impact, vip: true, businessCritical: true });
+                }
+            }
+            return result;
+        }
+        
+        private getVipCalculationParameters(): IVipCalculationParameters[] {
+            var result: IVipCalculationParameters[] = [];
+            var urgencyEnd: number = this._baseValue + this._urgencyRange;
+            var impactEnd: number = this._baseValue + this._impactRange;
+            for (var urgency: number = this._baseValue; urgency < urgencyEnd; urgency++) {
+                for (var impact: number = this._baseValue; impact < impactEnd; impact++) {
+                    result.push({ urgency: urgency, impact: impact, vip: false });
+                    result.push({ urgency: urgency, impact: impact, vip: true });
+                }
+            }
+            return result;
+        }
+        
+        private getBusinessCriticalCalculationParameters(): IBusinessCriticalCalculationParameters[] {
+            var result: IBusinessCriticalCalculationParameters[] = [];
+            var urgencyEnd: number = this._baseValue + this._urgencyRange;
+            var impactEnd: number = this._baseValue + this._impactRange;
+            for (var urgency: number = this._baseValue; urgency < urgencyEnd; urgency++) {
+                for (var impact: number = this._baseValue; impact < impactEnd; impact++) {
+                    result.push({ urgency: urgency, impact: impact, businessCritical: false });
+                    result.push({ urgency: urgency, impact: impact,  businessCritical: true });
+                }
+            }
+            return result;
+        }
+        
+        private getImpactUrgencyOnlyCalculationParameters(): ICalculationParameters[] {
+            var result: ICalculationParameters[] = [];
+            var urgencyEnd: number = this._baseValue + this._urgencyRange;
+            var impactEnd: number = this._baseValue + this._impactRange;
+            for (var urgency: number = this._baseValue; urgency < urgencyEnd; urgency++) {
+                for (var impact: number = this._baseValue; impact < impactEnd; impact++)
+                    result.push({ urgency: urgency, impact: impact });
+            }
+            return result;
+        }
+
+        private applyAllIntermediateResults(intermediateResults: IAllIntermediateResult[]): void {
+            this.$scope.calculationResults = intermediateResults.map(function(this: MainController, result: IAllIntermediateResult): ICalculationResultRow {
+                return {
+                    urgency: result.urgency,
+                    impact: result.impact,
+                    intermediateResult: result.intermediateResult,
+                    optionalValues: [result.vip ? "Yes" : "No", result.businessCritical ? "Yes" : "No"],
+                    priority: ((result.intermediateResult - this._minIntermediateResult / this._intermediateResultRange) * this._priorityRange) + this._baseValue
+                };
+            }, this);
+            this.applySort();
+        }
+
+        private recalculateAllOptionsWithProduct(): void {
+            this._minIntermediateResult = this.getAllParametersProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true, businessCritical: true });
+            this._intermediateResultRange = this.getAllParametersProduct({ urgency: this._baseValue, impact: this._baseValue, vip: false, businessCritical: false }) - this._minIntermediateResult;
+            this.applyAllIntermediateResults(this.getAllOptionsCalculationParameters().map(function(this: MainController, parameters: IAllCalculationParameters): IAllIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip, businessCritical: parameters.businessCritical, intermediateResult: this.getAllParametersProduct(parameters) };
+            }));
+        }
+        
+        private recalculateAllOptionsWithSum(): void {
+            this._minIntermediateResult = this.getAllParametersSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true, businessCritical: true });
+            this._intermediateResultRange = this.getAllParametersSum({ urgency: this._baseValue, impact: this._baseValue, vip: false, businessCritical: false }) - this._minIntermediateResult;
+            this.applyAllIntermediateResults(this.getAllOptionsCalculationParameters().map(function(this: MainController, parameters: IAllCalculationParameters): IAllIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip, businessCritical: parameters.businessCritical, intermediateResult: this.getAllParametersSum(parameters) };
+            }));
+        }
+        
+        private recalculateAllOptionsWithProductPlusSum(): void {
+            this._minIntermediateResult = this.getAllParametersProductWithSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true, businessCritical: true });
+            this._intermediateResultRange = this.getAllParametersProductWithSum({ urgency: this._baseValue, impact: this._baseValue, vip: false, businessCritical: false }) - this._minIntermediateResult;
+            this.applyAllIntermediateResults(this.getAllOptionsCalculationParameters().map(function(this: MainController, parameters: IAllCalculationParameters): IAllIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip, businessCritical: parameters.businessCritical, intermediateResult: this.getAllParametersProductWithSum(parameters) };
+            }));
+        }
+        
+        private recalculateAllOptionsWithProductFromSum(): void {
+            this._minIntermediateResult = this.getAllParametersSumWithProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true, businessCritical: true });
+            this._intermediateResultRange = this.getAllParametersSumWithProduct({ urgency: this._baseValue, impact: this._baseValue, vip: false, businessCritical: false }) - this._minIntermediateResult;
+            this.applyAllIntermediateResults(this.getAllOptionsCalculationParameters().map(function(this: MainController, parameters: IAllCalculationParameters): IAllIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip, businessCritical: parameters.businessCritical, intermediateResult: this.getAllParametersSumWithProduct(parameters) };
+            }));
+        }
+        
+        private applyVipIntermediateResults(intermediateResults: IVipIntermediateResult[]): void {
+            this.$scope.calculationResults = intermediateResults.map(function(this: MainController, result: IVipIntermediateResult): ICalculationResultRow {
+                return {
+                    urgency: result.urgency,
+                    impact: result.impact,
+                    intermediateResult: result.intermediateResult,
+                    optionalValues: [result.vip ? "Yes" : "No"],
+                    priority: ((result.intermediateResult - this._minIntermediateResult / this._intermediateResultRange) * this._priorityRange) + this._baseValue
+                };
+            }, this);
+            this.applySort();
+        }
+        
+        private recalculateVipWithProduct(): void {
+            this._minIntermediateResult = this.getVipParametersProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true });
+            this._intermediateResultRange = this.getVipParametersProduct({ urgency: this._baseValue, impact: this._baseValue, vip: false }) - this._minIntermediateResult;
+            this.applyVipIntermediateResults(this.getVipCalculationParameters().map(function(this: MainController, parameters: IVipCalculationParameters): IVipIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip,  intermediateResult: this.getVipParametersProduct(parameters) };
+            }));
+        }
+        
+        private recalculateVipWithSum(): void {
+            this._minIntermediateResult = this.getVipParametersSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true });
+            this._intermediateResultRange = this.getVipParametersSum({ urgency: this._baseValue, impact: this._baseValue, vip: false }) - this._minIntermediateResult;
+            this.applyVipIntermediateResults(this.getVipCalculationParameters().map(function(this: MainController, parameters: IVipCalculationParameters): IVipIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip,  intermediateResult: this.getVipParametersSum(parameters) };
+            }));
+        }
+        
+        private recalculateVipWithProductPlusSum(): void {
+            this._minIntermediateResult = this.getVipParametersProductWithSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true });
+            this._intermediateResultRange = this.getVipParametersProductWithSum({ urgency: this._baseValue, impact: this._baseValue, vip: false }) - this._minIntermediateResult;
+            this.applyVipIntermediateResults(this.getVipCalculationParameters().map(function(this: MainController, parameters: IVipCalculationParameters): IVipIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip,  intermediateResult: this.getVipParametersProductWithSum(parameters) };
+            }));
+        }
+        
+        private recalculateVipWithProductFromSum(): void {
+            this._minIntermediateResult = this.getVipParametersSumWithProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, vip: true });
+            this._intermediateResultRange = this.getVipParametersSumWithProduct({ urgency: this._baseValue, impact: this._baseValue, vip: false }) - this._minIntermediateResult;
+            this.applyVipIntermediateResults(this.getVipCalculationParameters().map(function(this: MainController, parameters: IVipCalculationParameters): IVipIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, vip: parameters.vip,  intermediateResult: this.getVipParametersSumWithProduct(parameters) };
+            }));
+        }
+        
+        private applyBusinessCriticalIntermediateResults(intermediateResults: IBusinessCriticalIntermediateResult[]): void {
+            this.$scope.calculationResults = intermediateResults.map(function(this: MainController, result: IBusinessCriticalIntermediateResult): ICalculationResultRow {
+                return {
+                    urgency: result.urgency,
+                    impact: result.impact,
+                    intermediateResult: result.intermediateResult,
+                    optionalValues: [result.businessCritical ? "Yes" : "No"],
+                    priority: ((result.intermediateResult - this._minIntermediateResult / this._intermediateResultRange) * this._priorityRange) + this._baseValue
+                };
+            }, this);
+            this.applySort();
+        }
+        
+        private recalculateBusinessCriticalWithProduct(): void {
+            this._minIntermediateResult = this.getBusinessCriticalParametersProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, businessCritical: true });
+            this._intermediateResultRange = this.getBusinessCriticalParametersProduct({ urgency: this._baseValue, impact: this._baseValue, businessCritical: false }) - this._minIntermediateResult;
+            this.applyBusinessCriticalIntermediateResults(this.getBusinessCriticalCalculationParameters().map(function(this: MainController, parameters: IBusinessCriticalCalculationParameters): IBusinessCriticalIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, businessCritical: parameters.businessCritical, intermediateResult: this.getBusinessCriticalParametersProduct(parameters) };
+            }));
+        }
+        
+        private recalculateBusinessCriticalWithSum(): void {
+            this._minIntermediateResult = this.getBusinessCriticalParametersSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, businessCritical: true });
+            this._intermediateResultRange = this.getBusinessCriticalParametersSum({ urgency: this._baseValue, impact: this._baseValue, businessCritical: false }) - this._minIntermediateResult;
+            this.applyBusinessCriticalIntermediateResults(this.getBusinessCriticalCalculationParameters().map(function(this: MainController, parameters: IBusinessCriticalCalculationParameters): IBusinessCriticalIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, businessCritical: parameters.businessCritical, intermediateResult: this.getBusinessCriticalParametersSum(parameters) };
+            }));
+        }
+        
+        private recalculateBusinessCriticalWithProductPlusSum(): void {
+            this._minIntermediateResult = this.getBusinessCriticalParametersProductWithSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, businessCritical: true });
+            this._intermediateResultRange = this.getBusinessCriticalParametersProductWithSum({ urgency: this._baseValue, impact: this._baseValue, businessCritical: false }) - this._minIntermediateResult;
+            this.applyBusinessCriticalIntermediateResults(this.getBusinessCriticalCalculationParameters().map(function(this: MainController, parameters: IBusinessCriticalCalculationParameters): IBusinessCriticalIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, businessCritical: parameters.businessCritical, intermediateResult: this.getBusinessCriticalParametersProductWithSum(parameters) };
+            }));
+        }
+        
+        private recalculateBusinessCriticalWithProductFromSum(): void {
+            this._minIntermediateResult = this.getBusinessCriticalParametersSumWithProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue, businessCritical: true });
+            this._intermediateResultRange = this.getBusinessCriticalParametersSumWithProduct({ urgency: this._baseValue, impact: this._baseValue, businessCritical: false }) - this._minIntermediateResult;
+            this.applyBusinessCriticalIntermediateResults(this.getBusinessCriticalCalculationParameters().map(function(this: MainController, parameters: IBusinessCriticalCalculationParameters): IBusinessCriticalIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, businessCritical: parameters.businessCritical, intermediateResult: this.getBusinessCriticalParametersSumWithProduct(parameters) };
+            }));
+        }
+        
+        private applyUrgencyImpactOnlyIntermediateResults(intermediateResults: IIntermediateResult[]): void {
+            this.$scope.calculationResults = intermediateResults.map(function(this: MainController, result: IIntermediateResult): ICalculationResultRow {
+                return {
+                    urgency: result.urgency,
+                    impact: result.impact,
+                    intermediateResult: result.intermediateResult,
+                    optionalValues: [],
+                    priority: ((result.intermediateResult - this._minIntermediateResult / this._intermediateResultRange) * this._priorityRange) + this._baseValue
+                };
+            }, this);
+            this.applySort();
+        }
+        
+        private recalculateUrgencyImpactOnlyWithProduct(): void {
+            this._minIntermediateResult = this.getUrgencyImpactOnlyParametersProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue });
+            this._intermediateResultRange = this.getUrgencyImpactOnlyParametersProduct({ urgency: this._baseValue, impact: this._baseValue }) - this._minIntermediateResult;
+            this.applyUrgencyImpactOnlyIntermediateResults(this.getImpactUrgencyOnlyCalculationParameters().map(function(this: MainController, parameters: ICalculationParameters): IIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, intermediateResult: this.getUrgencyImpactOnlyParametersProduct(parameters) };
+            }));
+        }
+        
+        private recalculateUrgencyImpactOnlyWithSum(): void {
+            this._minIntermediateResult = this.getUrgencyImpactOnlyParametersSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue });
+            this._intermediateResultRange = this.getUrgencyImpactOnlyParametersSum({ urgency: this._baseValue, impact: this._baseValue }) - this._minIntermediateResult;
+            this.applyUrgencyImpactOnlyIntermediateResults(this.getImpactUrgencyOnlyCalculationParameters().map(function(this: MainController, parameters: ICalculationParameters): IIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, intermediateResult: this.getUrgencyImpactOnlyParametersSum(parameters) };
+            }));
+        }
+        
+        private recalculateUrgencyImpactOnlyWithProductPlusSum(): void {
+            this._minIntermediateResult = this.getUrgencyImpactOnlyParametersProductWithSum({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue });
+            this._intermediateResultRange = this.getUrgencyImpactOnlyParametersProductWithSum({ urgency: this._baseValue, impact: this._baseValue }) - this._minIntermediateResult;
+            this.applyUrgencyImpactOnlyIntermediateResults(this.getImpactUrgencyOnlyCalculationParameters().map(function(this: MainController, parameters: ICalculationParameters): IIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, intermediateResult: this.getUrgencyImpactOnlyParametersProductWithSum(parameters) };
+            }));
+        }
+        
+        private recalculateUrgencyImpactOnlyWithProductFromSum(): void {
+            this._minIntermediateResult = this.getUrgencyImpactOnlyParametersSumWithProduct({ urgency: this._urgencyRange - 1 + this._baseValue, impact: this._impactRange - 1 + this._baseValue });
+            this._intermediateResultRange = this.getUrgencyImpactOnlyParametersSumWithProduct({ urgency: this._baseValue, impact: this._baseValue }) - this._minIntermediateResult;
+            this.applyUrgencyImpactOnlyIntermediateResults(this.getImpactUrgencyOnlyCalculationParameters().map(function(this: MainController, parameters: ICalculationParameters): IIntermediateResult {
+                return { urgency: parameters.urgency, impact: parameters.impact, intermediateResult: this.getUrgencyImpactOnlyParametersSumWithProduct(parameters) };
+            }));
+        }
+        
+        recalculate(): void {
+            if (this._vipOption) {
+                if (this._businessCriticalOption) {
+                    switch (this._baseFormula) {
+                        case BaseFormulaType.add:
+                            this.recalculateAllOptionsWithSum();
+                            break;
+                        case BaseFormulaType.multiplyAdd:
+                            this.recalculateAllOptionsWithProductPlusSum();
+                            break;
+                        case BaseFormulaType.addMultiply:
+                            this.recalculateAllOptionsWithProductFromSum();
+                            break;
+                        default:
+                            this.recalculateAllOptionsWithProduct();
+                            break;
+                    }
+                } else {
+                    switch (this._baseFormula) {
+                        case BaseFormulaType.add:
+                            this.recalculateVipWithSum();
+                            break;
+                        case BaseFormulaType.multiplyAdd:
+                            this.recalculateVipWithProductPlusSum();
+                            break;
+                        case BaseFormulaType.addMultiply:
+                            this.recalculateVipWithProductFromSum();
+                            break;
+                        default:
+                            this.recalculateVipWithProduct();
+                            break;
+                    }
+                }
+            } else {
+                if (this._businessCriticalOption) {
+                    switch (this._baseFormula) {
+                        case BaseFormulaType.add:
+                            this.recalculateBusinessCriticalWithSum();
+                            break;
+                        case BaseFormulaType.multiplyAdd:
+                            this.recalculateBusinessCriticalWithProductPlusSum();
+                            break;
+                        case BaseFormulaType.addMultiply:
+                            this.recalculateBusinessCriticalWithProductFromSum();
+                            break;
+                        default:
+                            this.recalculateBusinessCriticalWithProduct();
+                            break;
+                    }
+                } else {
+                    switch (this._baseFormula) {
+                        case BaseFormulaType.add:
+                            this.recalculateUrgencyImpactOnlyWithSum();
+                            break;
+                        case BaseFormulaType.multiplyAdd:
+                            this.recalculateUrgencyImpactOnlyWithProductPlusSum();
+                            break;
+                        case BaseFormulaType.addMultiply:
+                            this.recalculateUrgencyImpactOnlyWithProductFromSum();
+                            break;
+                        default:
+                            this.recalculateUrgencyImpactOnlyWithProduct();
+                            break;
+                    }
+                }
+            }
+        }
+
+        onUrgencyRangeChanged(newValue: number): void {
+            if (newValue == this._urgencyRange) return;
+            this._urgencyRange = newValue;
+            this.recalculate();
+        }
+
+        onImpactRangeChanged(newValue: number): void {
+            if (newValue == this._impactRange) return;
+            this._impactRange = newValue;
+            this.recalculate();
+        }
+
+        onPriorityRangeChanged(newValue: number): void {
+            if (newValue == this._priorityRange) return;
+            this._priorityRange = newValue;
+            this.recalculate();
+        }
+
+        onVipOptionChanged(newValue: boolean): void {
+            if (newValue == this._vipOption) return;
+            this._vipOption = newValue;
+            this.recalculate();
+        }
+
+        onBusinessCriticalOptionChanged(newValue: boolean): void {
+            if (newValue == this._businessCriticalOption) return;
+            this._businessCriticalOption = newValue;
+            this.recalculate();
+        }
+
+        onBaseValueChanged(newValue: number): void {
+            if (newValue == this._baseValue) return;
+            this._baseValue = newValue;
+            this.recalculate();
+        }
+
+        onValueShiftChanged(newValue: number): void {
+            if (newValue == this._valueShift) return;
+            this._valueShift = newValue;
+            this.recalculate();
+        }
+
+        onRoundingChanged(newValue: RoundingType): void {
+            if (newValue == this._rounding) return;
+            this._rounding = newValue;
+            this.recalculate();
+        }
+
+        onVipWeightChanged(newValue: number): void {
+            if (newValue == this._vipWeight) return;
+            this._vipWeight = newValue;
+            this.recalculate();
+        }
+
+        onBusinessCriticalWeightChanged(newValue: number): void {
+            if (newValue == this._businessCriticalWeight) return;
+            this._businessCriticalWeight = newValue;
+            this.recalculate();
+        }
+
+        onBaseFormulaChanged(newValue: BaseFormulaType): void {
+            if (newValue == this._baseFormula) return;
+            this._baseFormula = newValue;
+            this.recalculate();
+        }
     }
-    declare type FullCalculationMapContext = IFullCalculationContext & {
-        calculators: ICalculators;
-        baseFormula: BaseFormulaType;
-    }
-    declare type VipCalculationMapContext = IVipCalculationContext & {
-        calculators: ICalculators;
-        baseFormula: BaseFormulaType;
-    }
-    declare type BusinessCriticalCalculationMapContext = IBusinessCriticalCalculationContext & {
-        calculators: ICalculators;
-        baseFormula: BaseFormulaType;
-    }
-    declare type UrgencyImpactCalculationMapContext = IUrgencyImpactCalculationContext & {
-        calculators: ICalculators;
-        baseFormula: BaseFormulaType;
-    }
+    
     mainModule.controller("MainController", MainController);
 }

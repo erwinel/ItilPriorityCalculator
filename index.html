@@ -40,17 +40,18 @@
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
             <tr>
-                <th scope="col">Urgency</th>
-                <th scope="col">Impact</th>
-                <th scope="col" ng-repeat="h in headings">{{ h }}</th>
-                <th scope="col">Priority</th>
+                <th scope="col"><a ng-click="toggleUrgencySort()" href="#">Urgency<span ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
+                <th scope="col"><a ng-click="toggleImpactSort()" href="#">Impact<span ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                <th scope="col" ng-show="vipOption"><a ng-click="toggleVipSort()" href="#">VIP<span ng-show="vipSortDirection &lt; 0"> &UpArrow;</span><span ng-show="vipSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                <th scope="col" ng-show="businessCriticalOption"><a ng-click="toggleBusinessCriticalSort()"> href="#"Business Critical<span ng-show="businessCriticalSortDirection &lt; 0"> &UpArrow;</span><span ng-show="businessCriticalSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                <th scope="col"><a ng-click="togglePrioritySort()" href="#">Priority<span ng-show="prioritySortDirection &lt; 0"> &UpArrow;</span><span ng-show="prioritySortDirection &gt; 0"> &DownArrow;</span></a></th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="r in calculationResults">
                 <td>{{ r.urgency }}</td>
                 <td>{{ r.impact }}</td>
-                <td ng-repeat="v in r.values">{{ v }}</td>
+                <td ng-repeat="v in r.optionalValues">{{ v }}</td>
                 <th scope="row">{{ r.priority }}</th>
             </tr>
         </tbody>
