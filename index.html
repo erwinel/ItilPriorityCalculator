@@ -43,7 +43,7 @@
                 <th scope="col"><a ng-click="toggleUrgencySort()" href="#">Urgency<span ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
                 <th scope="col"><a ng-click="toggleImpactSort()" href="#">Impact<span ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
                 <th scope="col" ng-show="vipOption"><a ng-click="toggleVipSort()" href="#">VIP<span ng-show="vipSortDirection &lt; 0"> &UpArrow;</span><span ng-show="vipSortDirection &gt; 0"> &DownArrow;</span></a></th>
-                <th scope="col" ng-show="businessCriticalOption"><a ng-click="toggleBusinessCriticalSort()"> href="#"Business Critical<span ng-show="businessCriticalSortDirection &lt; 0"> &UpArrow;</span><span ng-show="businessCriticalSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                <th scope="col" ng-show="businessCriticalOption"><a ng-click="toggleBusinessCriticalSort()" href="#">Business Critical<span ng-show="businessCriticalSortDirection &lt; 0"> &UpArrow;</span><span ng-show="businessCriticalSortDirection &gt; 0"> &DownArrow;</span></a></th>
                 <th scope="col"><a ng-click="togglePrioritySort()" href="#">Priority<span ng-show="prioritySortDirection &lt; 0"> &UpArrow;</span><span ng-show="prioritySortDirection &gt; 0"> &DownArrow;</span></a></th>
             </tr>
         </thead>
@@ -94,12 +94,7 @@
                                         <label class="input-group-text" for="urgencyRangeDropDown">Urgency</label>
                                     </div>
                                     <select id="urgencyRangeDropDown" class="custom-select" ng-model="urgencyRange">
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>6</option>
-                                        <option>7</option>
+                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -109,12 +104,7 @@
                                         <label class="input-group-text" for="impactRangeDropDown">Impact</label>
                                     </div>
                                     <select id="impactRangeDropDown" class="custom-select" ng-model="impactRange">
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
+                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -124,12 +114,7 @@
                                         <label class="input-group-text" for="priorityRange">Priority</label>
                                     </div>
                                     <select id="priorityRangeDropDown" class="custom-select" ng-model="priorityRange">
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
+                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -178,25 +163,25 @@
                             <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
                                 id="multiplyFormulaRadioButton" value="multiply" ng-model="baseFormula">
                             <label class="form-check-label"
-                                for="multiplyFormulaRadioButton">Multiply<br /><code>height * width</code></label>
+                                for="multiplyFormulaRadioButton">Multiply<br /><code>urgency * impact</code></label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
                                 id="addFormulaRadioButton" value="add" ng-model="baseFormula">
                             <label class="form-check-label"
-                                for="addFormulaRadioButton">Add<br /><code>height + width</code></label>
+                                for="addFormulaRadioButton">Add<br /><code>urgency + impact</code></label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
                                 id="multiplyAddFormulaRadioButton" value="multiplyAdd" ng-model="baseFormula">
-                            <label class="form-check-label" for="addFormulaRadioButton">Multiply, then
-                                Add<br /><code>(height * width) + height + width</code></label>
+                            <label class="form-check-label" for="multiplyAddFormulaRadioButton">Multiply, then
+                                Add<br /><code>(urgency * impact) + urgency + impact</code></label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
                                 id="addMultiplyFormulaRadioButton" value="addMultiply" ng-model="baseFormula">
-                            <label class="form-check-label" for="addFormulaRadioButton">Add, then
-                                Multiply<br /><code>(height + width) * height * width</code></label>
+                            <label class="form-check-label" for="addMultiplyFormulaRadioButton">Add, then
+                                Multiply<br /><code>(urgency + impact) * urgency * impact</code></label>
                         </div>
                     </div>
                     <div class="modal-footer">
