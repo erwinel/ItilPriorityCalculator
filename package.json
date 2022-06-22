@@ -2,9 +2,31 @@
   "devDependencies": {
     "@types/angular": "^1.8.4",
     "@types/bootstrap": "^5.1.12",
-    "@types/jquery": "^3.5.14"
+    "@types/jquery": "^3.5.14",
+    "jsdoc": "^3.6.10"
   },
   "dependencies": {
     "@types/angular-ui-bootstrap": "^1.0.1"
-  }
+  },
+  "name": "itilprioritycalculator",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lerwine/ItilPriorityCalculator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lerwine/ItilPriorityCalculator/issues"
+  },
+  "homepage": "https://github.com/lerwine/ItilPriorityCalculator#readme"
 }

@@ -32,246 +32,116 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap.min.js"
         integrity="sha512-DnqROrGrc9uBNiRGC7ZWLbctwtoVcD5005fL7pGUOkylaE7zXunb6xYUkD/nI0MYZn8XxReXnub2V/nspYUkUw=="
         crossorigin="anonymous"></script>
-    <script src="lib/app.js"></script>
+    <script src="lib/itilPriorityCalculator.js"></script>
     <title>ITIL Priority Calculator</title>
 </head>
 
-<body ng-app="mainModule" ng-controller="MainController">
-    <table class="table table-striped table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col"><a ng-click="toggleUrgencySort()" href="#">Urgency<span ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
-                <th scope="col"><a ng-click="toggleImpactSort()" href="#">Impact<span ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
-                <th scope="col" ng-show="vipOption"><a ng-click="toggleVipSort()" href="#">VIP<span ng-show="vipSortDirection &lt; 0"> &UpArrow;</span><span ng-show="vipSortDirection &gt; 0"> &DownArrow;</span></a></th>
-                <th scope="col" ng-show="businessCriticalOption"><a ng-click="toggleBusinessCriticalSort()" href="#">Business Critical<span ng-show="businessCriticalSortDirection &lt; 0"> &UpArrow;</span><span ng-show="businessCriticalSortDirection &gt; 0"> &DownArrow;</span></a></th>
-                <th scope="col"><a ng-click="togglePrioritySort()" href="#">Priority<span ng-show="prioritySortDirection &lt; 0"> &UpArrow;</span><span ng-show="prioritySortDirection &gt; 0"> &DownArrow;</span></a></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="r in calculationResults">
-                <td>{{ r.urgency }}</td>
-                <td>{{ r.impact }}</td>
-                <td ng-repeat="v in r.optionalValues">{{ v }}</td>
-                <th scope="row">{{ r.priority }}</th>
-            </tr>
-        </tbody>
-    </table>
-    <div class="row">
-        <div class="col">
-            <code>{{ formulaText }}</code>
-        </div>
+<body ng-app="itilPriorityCalculatorModule" ng-controller="MainController as ctrl">
+    <div class="container-fluid">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col"><a ng-click="ctrl.onColumnHeadingClick('urgency', $event)" href="#">Urgency<span
+                                ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span
+                                ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
+                    <th scope="col"><a ng-click="ctrl.onColumnHeadingClick('impact', $event)" href="#">Impact<span
+                                ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span
+                                ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                    <th scope="col"><a ng-click="ctrl.onColumnHeadingClick('priority', $event)" href="#">Priority<span
+                                ng-show="prioritySortDirection &lt; 0"> &UpArrow;</span><span
+                                ng-show="prioritySortDirection &gt; 0"> &DownArrow;</span></a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="row in resultRows">
+                    <td>{{row.urgency}}</td>
+                    <td>{{row.impact}}</td>
+                    <th scope="row">{{row.priority}}</th>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <form name="mainForm">
-        <div class="row">
-            <div class="col">
-                <button type="button" class="btn btn-primary" ng-click="showRangesModal()">Ranges</button>
-            </div>
-            <div class="col">
-                <button type="button" class="btn btn-primary" ng-click="showBaseFormulaModal()">Base Formula</button>
-            </div>
-            <div class="col">
-                <button type="button" class="btn btn-primary" ng-click="showOptionalValues()">Optional Values</button>
-            </div>
-            <div class="col">
-                <button type="button" class="btn btn-primary" ng-click="showRoundingOptions()">Rounding Behavior</button>
-            </div>
-        </div>
-        <div class="modal fade" id="rangesModal" tabindex="-1" role="dialog" aria-labelledby="rangesModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
+    <form>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" ng-click="showModifySettingsDialog($event)">
+            Modify Settings
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modifySettingsDialog" tabindex="-1" role="dialog"
+            aria-labelledby="modifySettingsTitle">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="rangesModalLabel">Ranges</h5>
-                        <button type="button" class="close" ng-click="hideRangesModal()" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                        <h5 class="modal-title" id="modifySettingsTitle">Modify Settings</h5>
+                        <button type="button" class="close" aria-label="Close"
+                            ng-click="hideModifySettingsDialog($event)">
+                            <span>&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="row border border-dark">
-                            <div class="col">
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text" for="urgencyRangeDropDown">Urgency</label>
-                                    </div>
-                                    <select id="urgencyRangeDropDown" class="custom-select" ng-model="urgencyRange">
-                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text" for="impactRangeDropDown">Impact</label>
-                                    </div>
-                                    <select id="impactRangeDropDown" class="custom-select" ng-model="impactRange">
-                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <label class="input-group-text" for="priorityRange">Priority</label>
-                                    </div>
-                                    <select id="priorityRangeDropDown" class="custom-select" ng-model="priorityRange">
-                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row border border-dark">
+                        <div class="row">
                             <div class="col">
                                 <div class="form-group">
-                                    <label for="baseValueTextBox">Base Number Value</label>
-                                    <input type="number" class="form-control" id="baseValueTextBox"
-                                        name="baseValueTextBox" ng-model="baseValue" required />
-                                    <span ng-show="mainForm.baseValueTextBox.$invalid">The base number value
-                                        required.</span>
-                                    <small id="emailHelp" class="form-text text-muted">This value is the lowest value for urgency, impact and priority values.</small>
+                                    <label for="urgencyRangeDropDown">Urgency Range</label>
+                                    <select class="form-control" id="urgencyRangeDropDown" ng-model="urgencyRange">
+                                        <option ng-repeat="o in rangeOptions">{{o}}</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group">
-                                    <label for="valueShiftTextBox">Calculation Shift</label>
-                                    <input type="number" class="form-control" id="valueShiftTextBox"
-                                        name="valueShiftTextBox" ng-model="valueShift" required />
-                                    <span ng-show="mainForm.valueShiftTextBox.$invalid">The number
-                                        calculation shift value required.</span>
-                                    <small id="emailHelp" class="form-text text-muted">This value is added to the urgency and impact values before calculating priority.</small>
+                                    <label for="impactRangeRangeDropDown">Impact Range</label>
+                                    <select class="form-control" id="impactRangeRangeDropDown" ng-model="impactRange">
+                                        <option ng-repeat="o in rangeOptions">{{o}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="priorityRangeRangeDropDown">Priority Range</label>
+                                    <select class="form-control" id="priorityRangeRangeDropDown"
+                                        ng-model="priorityRange">
+                                        <option ng-repeat="o in rangeOptions">{{o}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="roundingOptionDropDown">Rounding Option</label>
+                                    <select class="form-control" id="roundingOptionDropDown"
+                                        ng-model="currentRoundingOption">
+                                        <option ng-repeat="o in roundingOptions" ng-value="o.id">{{o.label}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-9">
+                                <div class="form-group">
+                                    <label for="baseFormulaOptionDropDown">Base Formula</label>
+                                    <select class="form-control" id="baseFormulaOptionDropDown"
+                                        ng-model="currentBaseFormula">
+                                        <option ng-repeat="o in baseFormulaOptions" ng-value="o.id">{{o.label}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="isZeroBasedCheckBox"
+                                        ng-model="isZeroBased">
+                                    <label class="form-check-label" for="isZeroBasedCheckBox">
+                                        Zero-based values
+                                    </label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" ng-click="hideRangesModal()">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="baseFormulaModal" tabindex="-1" role="dialog"
-            aria-labelledby="baseFormulaModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="baseFormulaModalLabel">Base Formula</h5>
-                        <button type="button" class="close" ng-click="hideBaseFormulaModal()" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
-                                id="multiplyFormulaRadioButton" value="multiply" ng-model="baseFormula">
-                            <label class="form-check-label"
-                                for="multiplyFormulaRadioButton">Multiply<br /><code>urgency * impact</code></label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
-                                id="addFormulaRadioButton" value="add" ng-model="baseFormula">
-                            <label class="form-check-label"
-                                for="addFormulaRadioButton">Add<br /><code>urgency + impact</code></label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
-                                id="multiplyAddFormulaRadioButton" value="multiplyAdd" ng-model="baseFormula">
-                            <label class="form-check-label" for="multiplyAddFormulaRadioButton">Multiply, then
-                                Add<br /><code>(urgency * impact) + urgency + impact</code></label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
-                                id="addMultiplyFormulaRadioButton" value="addMultiply" ng-model="baseFormula">
-                            <label class="form-check-label" for="addMultiplyFormulaRadioButton">Add, then
-                                Multiply<br /><code>(urgency + impact) * urgency * impact</code></label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" ng-click="hideBaseFormulaModal()">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="optionalValuesModal" tabindex="-1" role="dialog"
-            aria-labelledby="optionalValuesModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="optionalValuesModalLabel">Optional Values</h5>
-                        <button type="button" class="close" ng-click="hideOptionalValues()" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <label for="vipCheckBox">VIP</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend"></div>
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <input type="checkbox" id="vipCheckBox" name="vipCheckBox" aria-label="VIP"
-                                        ng-model="vipOption" />
-                                </div>
-                            </div>
-                            <input type="number" id="vipWeightTextBox" name="vipWeightTextBox" class="form-control"
-                                ng-model="vipWeight" aria-label="VIP weight value" ng-disabled="!vipOption" required />
-                            <span ng-show="mainForm.vipWeightTextBox.$invalid">VIP weight value is required.</span>
-                        </div>
-                        <label for="businessCriticalCheckBox">Business Critical</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <input type="checkbox" id="businessCriticalCheckBox" name="businessCriticalCheckBox"
-                                        aria-label="Business Critical" ng-model="businessCriticalOption" />
-                                </div>
-                            </div>
-                            <input type="number" id="businessCriticalWeightTextBox" name="businessCriticalWeightTextBox"
-                                class="form-control" ng-model="businessCriticalWeight"
-                                aria-label="Business Critical weight value" ng-disabled="!businessCriticalOption" required />
-                            <span ng-show="mainForm.businessCriticalWeightTextBox.$invalid">Business Critical weight
-                                value is required.</span>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" ng-click="hideOptionalValues()">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="roundingOptionsModal" tabindex="-1" role="dialog"
-            aria-labelledby="roundingOptionsModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="roundingOptionsModalLabel">Rounding Behavior</h5>
-                        <button type="button" class="close" ng-click="hideRoundingOptions()" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="input-group mb-3">
-                            <div class="input-group-text">
-                                <input type="radio" id="floorRadioButton" name="roundingRadioButton"
-                                    value="ceiling" ng-model="rounding" />
-                            </div>
-                            <label for="floorRadioButton" class="form-control">Ceiling</label>
-                        </div>
-                        <div class="input-group mb-3">
-                            <div class="input-group-text">
-                                <input type="radio" id="ceilingRadioButton"
-                                    name="roundingRadioButton" value="floor" ng-model="rounding" />
-                            </div>
-                            <label for="ceilingRadioButton" class="form-control">Floor</label>
-                        </div>
-                        <div class="input-group mb-3">
-                            <div class="input-group-text">
-                                <input type="radio" id="roundNearestRadioButton"
-                                    name="roundingRadioButton" value="nearest"
-                                    ng-model="rounding" />
-                            </div>
-                            <label for="roundNearestRadioButton"
-                                class="form-control">Nearest</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" ng-click="hideRoundingOptions()">Close</button>
+                        <button type="button" class="btn btn-primary"
+                            ng-click="hideModifySettingsDialog($event)">Close</button>
                     </div>
                 </div>
             </div>

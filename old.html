@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular-csp.css"
+        integrity="sha512-f7WVHp6iaZ7iOx9duYm67KLwCFJ9KirfMIK0MAOxf1wq5M8Ogdw5ljbCxlk/BtWIbyXWMsIaDaqwUpXttPQ/5g=="
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/css/bootstrap.min.css"
+        integrity="sha512-o/MhoRPVLExxZjCFVBsm17Pkztkzmh7Dp8k7/3JrtNCHh0AQ489kwpfA3dPSHzKDe8YCuEhxXq3Y71eb/o6amg=="
+        crossorigin="anonymous" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/css/bootstrap-grid.min.css"
+        integrity="sha512-QWjMsIpO5eW4+c4ASTEaZ4+eZNZ4YTtSDiu167Rq1Eqw//WlO+rXo4OvZMpyW/ykbN5LFeXmN6N416OzmWo7fA=="
+        crossorigin="anonymous" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap-csp.min.css"
+        integrity="sha512-3mC4Q7Z/awACW7Zf0QGvaU8dEXv862RQD6kmpNXTuiUV6X/sdl1QhiiN5z9x/iNpvMFsQ+NBD3TKGrFI3vP0QA=="
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="lib/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"
+        integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.js"
+        integrity="sha512-klc+qN5PPscoGxSzFpetVsCr9sryi2e2vHwZKq43FdFyhSAa7vAqog/Ifl8tzg/8mBZiG2MAKhyjH5oPJp65EA=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/js/bootstrap.min.js"
+        integrity="sha512-Hqe3s+yLpqaBbXM6VA0cnj/T56ii5YjNrMT9v+us11Q81L0wzUG0jEMNECtugqNu2Uq5MSttCg0p4KK0kCPVaQ=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.6/ui-bootstrap.min.js"
+        integrity="sha512-DnqROrGrc9uBNiRGC7ZWLbctwtoVcD5005fL7pGUOkylaE7zXunb6xYUkD/nI0MYZn8XxReXnub2V/nspYUkUw=="
+        crossorigin="anonymous"></script>
+    <script src="lib/app.js"></script>
+    <title>ITIL Priority Calculator</title>
+</head>
+
+<body ng-app="mainModule" ng-controller="MainController as ctrl">
+    <nav>
+        <div class="nav nav-tabs" id="nav-resultsTab">
+            <a id="nav-basic-tab" ng-class="tabs.basic.tabClassNames" href="#" ng-click="setActiveResultsTab('basic', $event)">Basic</a>
+            <a id="nav-vipOnly-tab" ng-class="tabs.vipOnly.tabClassNames" href="#" ng-click="setActiveResultsTab('vipOnly', $event)">VIP Only</a>
+            <a id="nav-businessRelatedOnly-tab" ng-class="tabs.businessRelatedOnly.tabClassNames" href="#" ng-click="setActiveResultsTab('businessRelatedOnly', $event)">Business Related Only</a>
+            <a id="nav-allOptions-tab" ng-class="tabs.allOptions.tabClassNames" href="#" ng-click="setActiveResultsTab('allOptions', $event)">All Options</a>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-resultsTabContent">
+        <div ng-class="tabs.basic.contentClassNames" ng-show="tabs.basic.isActive" role="tabpanel" aria-labelledby="nav-basic-tab">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th colspan="2">Priority</th>
+                    </tr>
+                    <tr>
+                        <th scope="col" rowspan="2"><a ng-click="toggleUrgencySort()" href="#">Urgency<span ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th scope="col" rowspan="2"><a ng-click="toggleImpactSort()" href="#">Impact<span ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th scope="col">Priority</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="r in calculationResults">
+                        <td>{{ r.urgency }}</td>
+                        <td>{{ r.impact }}</td>
+                        <th scope="row">{{ r.urgencyImpactOnly }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div ng-class="tabs.vipOnly.contentClassNames" ng-show="tabs.vipOnly.isActive" role="tabpanel" aria-labelledby="nav-vipOnly-tab">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" rowspan="2"><a ng-click="toggleUrgencySort()" href="#">Urgency<span ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th scope="col" rowspan="2"><a ng-click="toggleImpactSort()" href="#">Impact<span ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th colspan="2">Priority</th>
+                    </tr>
+                    <tr>
+                        <th scope="col">VIP</th>
+                        <th scope="col">Normal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="r in calculationResults">
+                        <td>{{ r.urgency }}</td>
+                        <td>{{ r.impact }}</td>
+                        <td>{{ r.vipOnly.vipTrue }}</td>
+                        <th scope="row">{{ r.vipOnly.vipFalse }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div ng-class="tabs.businessRelatedOnly.contentClassNames" ng-show="tabs.businessRelatedOnly.isActive" role="tabpanel" aria-labelledby="nav-businessRelatedOnly-tab">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" rowspan="2"><a ng-click="toggleUrgencySort()" href="#">Urgency<span ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th scope="col" rowspan="2"><a ng-click="toggleImpactSort()" href="#">Impact<span ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th colspan="2">Priority</th>
+                    </tr>
+                    <tr>
+                        <th scope="col">Business Related</th>
+                        <th scope="col">Normal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="r in calculationResults">
+                        <td>{{ r.urgency }}</td>
+                        <td>{{ r.impact }}</td>
+                        <td>{{ r.businessRelatedOnly.businessRelatedTrue }}</td>
+                        <th scope="row">{{ r.businessRelatedOnly.businessRelatedFalse }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div ng-class="tabs.allOptions.contentClassNames" ng-show="tabs.allOptions.isActive" role="tabpanel" aria-labelledby="nav-allOptions-tab">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" rowspan="2"><a ng-click="toggleUrgencySort()" href="#">Urgency<span ng-show="urgencySortDirection &lt; 0"> &UpArrow;</span><span ng-show="urgencySortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th scope="col" rowspan="2"><a ng-click="toggleImpactSort()" href="#">Impact<span ng-show="impactSortDirection &lt; 0"> &UpArrow;</span><span ng-show="impactSortDirection &gt; 0"> &DownArrow;</span></a></th>
+                        <th colspan="4">Priority</th>
+                    </tr>
+                    <tr>
+                        <th scope="col">VIP and Business Critical</th>
+                        <th scope="col">Business Critical Only</th>
+                        <th scope="col">VIP Only</th>
+                        <th scope="col">Normal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="r in calculationResults">
+                        <td>{{ r.urgency }}</td>
+                        <td>{{ r.impact }}</td>
+                        <td>{{ r.full.vipTrue.businessRelatedTrue }}</td>
+                        <td>{{ r.full.vipFalse.businessRelatedTrue }}</td>
+                        <td>{{ r.full.vipTrue.businessRelatedFalse }}</td>
+                        <th scope="row">{{ r.full.vipFalse.businessRelatedFalse }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <form name="mainForm">
+        <div class="btn-group" role="group" aria-label="Options">
+            <button type="button" class="btn btn-primary" ng-click="showRangesModal()">Ranges</button>
+            <button type="button" class="btn btn-primary" ng-click="showBaseFormulaModal()">Base Formula</button>
+            <button type="button" class="btn btn-primary" ng-click="showRoundingOptions()">Rounding Behavior</button>
+        </div>
+        <div class="modal fade" id="rangesModal" tabindex="-1" role="dialog" aria-labelledby="rangesModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rangesModalLabel">Ranges</h5>
+                        <button type="button" class="close" ng-click="hideRangesModal()" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row border border-dark">
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="urgencyRangeDropDown">Urgency</label>
+                                    </div>
+                                    <select id="urgencyRangeDropDown" class="custom-select" ng-model="urgencyRange">
+                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="impactRangeDropDown">Impact</label>
+                                    </div>
+                                    <select id="impactRangeDropDown" class="custom-select" ng-model="impactRange">
+                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="priorityRange">Priority</label>
+                                    </div>
+                                    <select id="priorityRangeDropDown" class="custom-select" ng-model="priorityRange">
+                                        <option ng-repeat="r in rangeValues"> {{ r }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row border border-dark">
+                            <div class="col">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="baseValue" id="oneBasedValuesRadioButton" value="0">
+                                    <label class="form-check-label" for="exampleRadios1">1-based values</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="baseValue" id="zeroBasedValuesRadioButton" value="1">
+                                    <label class="form-check-label" for="exampleRadios2">0-based values</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" ng-click="hideRangesModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="baseFormulaModal" tabindex="-1" role="dialog"
+            aria-labelledby="baseFormulaModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="baseFormulaModalLabel">Base Formula</h5>
+                        <button type="button" class="close" ng-click="hideBaseFormulaModal()" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
+                                id="multiplyFormulaRadioButton" value="multiply" ng-model="baseFormula">
+                            <label class="form-check-label"
+                                for="multiplyFormulaRadioButton">Multiply<br /><code>urgency * impact</code></label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
+                                id="addFormulaRadioButton" value="add" ng-model="baseFormula">
+                            <label class="form-check-label"
+                                for="addFormulaRadioButton">Add<br /><code>urgency + impact</code></label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
+                                id="multiplyAddFormulaRadioButton" value="multiplyAdd" ng-model="baseFormula">
+                            <label class="form-check-label" for="multiplyAddFormulaRadioButton">Multiply, then
+                                Add<br /><code>(urgency * impact) + urgency + impact</code></label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="baseFormulaRadioButton"
+                                id="addMultiplyFormulaRadioButton" value="addMultiply" ng-model="baseFormula">
+                            <label class="form-check-label" for="addMultiplyFormulaRadioButton">Add, then
+                                Multiply<br /><code>(urgency + impact) * urgency * impact</code></label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" ng-click="hideBaseFormulaModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="roundingOptionsModal" tabindex="-1" role="dialog"
+            aria-labelledby="roundingOptionsModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="roundingOptionsModalLabel">Rounding Behavior</h5>
+                        <button type="button" class="close" ng-click="hideRoundingOptions()" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group mb-3">
+                            <div class="input-group-text">
+                                <input type="radio" id="floorRadioButton" name="roundingRadioButton"
+                                    value="ceiling" ng-model="rounding" />
+                            </div>
+                            <label for="floorRadioButton" class="form-control">Ceiling</label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-text">
+                                <input type="radio" id="ceilingRadioButton"
+                                    name="roundingRadioButton" value="floor" ng-model="rounding" />
+                            </div>
+                            <label for="ceilingRadioButton" class="form-control">Floor</label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-text">
+                                <input type="radio" id="roundNearestRadioButton"
+                                    name="roundingRadioButton" value="nearest"
+                                    ng-model="rounding" />
+                            </div>
+                            <label for="roundNearestRadioButton"
+                                class="form-control">Nearest</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" ng-click="hideRoundingOptions()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
+
+</html>
